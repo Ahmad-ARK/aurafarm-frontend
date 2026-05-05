@@ -1,65 +1,178 @@
-import Image from "next/image";
+'use client';
+
+import { useState, useEffect } from "react";
+import LoginScreen from '@/components/screens/LoginScreen';
+import DashboardScreen from "@/components/screens/DashboardScreen";
+import { T } from '@/lib/tokens';
+import Icon from '@/components/ui/Icon';
+import AddPlotScreen from '@/components/screens/AddPlotScreen';
+import PlotsScreen from '@/components/screens/PlotsScreen';
+import StartCycleScreen from '@/components/screens/StartCycleScreen';
+import CycleDetailScreen from '@/components/screens/CycleDetailScreen';
+import FertilizerScreen from '@/components/screens/FertilizerScreen';
+import ProfileScreen from '@/components/screens/ProfileScreen';
+import AlertsScreen from '@/components/screens/AlertsScreen';
+import WeatherScreen from '@/components/screens/WeatherScreen';
+import RegisterScreen from '@/components/screens/RegisterScreen';
 
 export default function Home() {
+  const [screen, setScreen] = useState('login');
+  const [history, setHistory] = useState<string[]>([]);
+  const [extras, setExtras] = useState<{ cycleId?: string }>({});
+
+  useEffect(() => {
+    if (localStorage.getItem('token')) {
+      setScreen('dashboard');
+    }
+  }, []);
+
+  function navigate(screenName: string, data?: { cycleId?: string }) {
+    setHistory(h => [...h, screen]);
+    if (data) setExtras(data);
+    setScreen(screenName);
+  }
+
+  function goBack() {
+    if (history.length > 0) {
+      const prev = history[history.length - 1];
+      setHistory(h => h.slice(0, -1));
+      setScreen(prev);
+    }
+  }
+
+  function renderScreen() {
+    switch (screen) {
+      case 'login':
+        return <LoginScreen navigate={navigate} />;
+      case 'dashboard':
+        return <DashboardScreen navigate={navigate} />;
+      case 'add-plot':
+        return <AddPlotScreen navigate={navigate} />;
+      case 'plots':
+        return <PlotsScreen navigate={navigate} />;
+      case 'start-cycle':
+        return <StartCycleScreen navigate={navigate} />;
+      case 'cycle-detail':
+        return <CycleDetailScreen cycleId={extras.cycleId || ''} navigate={navigate} />;
+      case 'fertilizer':
+        return <FertilizerScreen cycleId={extras.cycleId || ''} navigate={navigate} />;
+      case 'profile':
+        return <ProfileScreen navigate={navigate} />;
+      case 'alerts':
+        return <AlertsScreen navigate={navigate} />;
+      case 'weather':
+        return <WeatherScreen navigate={navigate} />;
+      case 'register':
+        return <RegisterScreen navigate={navigate} />;
+      default:
+        return <LoginScreen navigate={navigate} />;
+    }
+  }
+
+  console.log('current screen:', screen);
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <main style={{
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      minHeight: '100vh',
+      background: '#1a1a1a',
+    }}>
+      <div style={{
+        width: 390,
+        height: 844,
+        background: '#FAFAF7',
+        borderRadius: 44,
+        overflow: 'hidden',
+        display: 'flex',
+        flexDirection: 'column',
+        boxShadow: '0 40px 80px rgba(0,0,0,0.5)',
+      }}>
+
+        {/* Screen content */}
+        <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+          {/* Header for inner screens */}
+          {['add-plot', 'start-cycle', 'fertilizer', 'alerts', 'cycle-detail', 'weather'].includes(screen) && (
+            <div style={{
+              height: 52,
+              display: 'flex',
+              alignItems: 'center',
+              padding: '0 16px',
+              background: T.surface,
+              borderBottom: `1px solid ${T.border}`,
+              flexShrink: 0,
+            }}>
+              <button
+                onClick={goBack}
+                style={{
+                  width: 36, height: 36,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  border: 'none', background: 'none', cursor: 'pointer',
+                  color: T.green800,
+                }}
+              >
+                <Icon name="chevronLeft" size={22} color={T.green800} />
+              </button>
+              <span style={{ fontSize: 17, fontWeight: 600, color: T.text, marginLeft: 4 }}>
+                {screen === 'add-plot' ? 'Add New Plot'
+                  : screen === 'start-cycle' ? 'Start New Cycle'
+                    : screen === 'fertilizer' ? 'Fertilizer Plan'
+                      : screen === 'alerts' ? 'Disease Alerts'
+                        : screen === 'cycle-detail' ? 'Crop Cycle'
+                          : screen === 'weather' ? '7-Day Forecast'
+                            : ''}
+              </span>
+            </div>
+          )}
+          {renderScreen()}
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+
+        {/* Bottom Nav */}
+        {['dashboard', 'plots', 'alerts', 'profile'].includes(screen) && (
+          <div style={{
+            height: 72,
+            background: '#FFFFFF',
+            borderTop: `1px solid ${T.border}`,
+            display: 'flex',
+            flexShrink: 0,
+          }}>
+            {[
+              { id: 'dashboard', label: 'Home', icon: 'home' },
+              { id: 'plots', label: 'Plots', icon: 'map' },
+              { id: 'alerts', label: 'Alerts', icon: 'alert' },
+              { id: 'profile', label: 'Profile', icon: 'user' },
+            ].map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => navigate(tab.id)}
+                style={{
+                  flex: 1,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 4,
+                  border: 'none',
+                  background: 'none',
+                  cursor: 'pointer',
+                  color: screen === tab.id ? T.green800 : T.muted,
+                  fontWeight: screen === tab.id ? 600 : 400,
+                  fontSize: 11,
+                }}
+              >
+                <Icon
+                  name={tab.icon}
+                  size={22}
+                  color={screen === tab.id ? T.green800 : T.muted}
+                />
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        )}
+
+      </div>
+    </main>
   );
 }
