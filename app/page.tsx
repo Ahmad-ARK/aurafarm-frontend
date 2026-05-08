@@ -14,11 +14,12 @@ import ProfileScreen from '@/components/screens/ProfileScreen';
 import AlertsScreen from '@/components/screens/AlertsScreen';
 import WeatherScreen from '@/components/screens/WeatherScreen';
 import RegisterScreen from '@/components/screens/RegisterScreen';
+import SoilEntryScreen from "@/components/screens/SoilEntryScreen";
 
 export default function Home() {
   const [screen, setScreen] = useState('login');
   const [history, setHistory] = useState<string[]>([]);
-  const [extras, setExtras] = useState<{ cycleId?: string }>({});
+  const [extras, setExtras] = useState<{ cycleId?: string; plotId?: string; plotName?: string }>({});
 
   useEffect(() => {
     if (localStorage.getItem('token')) {
@@ -64,6 +65,8 @@ export default function Home() {
         return <WeatherScreen navigate={navigate} />;
       case 'register':
         return <RegisterScreen navigate={navigate} />;
+      case 'soil-entry':
+        return <SoilEntryScreen plotId={extras.plotId || ''} plotName={extras.plotName || ''} navigate={navigate} />;
       default:
         return <LoginScreen navigate={navigate} />;
     }
@@ -93,7 +96,7 @@ export default function Home() {
         {/* Screen content */}
         <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
           {/* Header for inner screens */}
-          {['add-plot', 'start-cycle', 'fertilizer', 'alerts', 'cycle-detail', 'weather'].includes(screen) && (
+          {['add-plot', 'start-cycle', 'fertilizer', 'alerts', 'cycle-detail', 'weather', 'soil-entry'].includes(screen) && (
             <div style={{
               height: 52,
               display: 'flex',
@@ -121,7 +124,9 @@ export default function Home() {
                       : screen === 'alerts' ? 'Disease Alerts'
                         : screen === 'cycle-detail' ? 'Crop Cycle'
                           : screen === 'weather' ? '7-Day Forecast'
-                            : ''}
+                            : screen === 'soil-entry' ? 'Soil Lab Data'
+                              : screen === 'soil-entry' ? 'Soil Lab Data'
+                                : ''}
               </span>
             </div>
           )}

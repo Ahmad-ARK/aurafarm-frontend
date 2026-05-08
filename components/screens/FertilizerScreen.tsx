@@ -217,6 +217,33 @@ export default function FertilizerScreen({ cycleId, navigate }: Props) {
                                 </div>
                             </div>
                         </div>
+
+                        {/* Regenerate button */}
+                        <div style={{ textAlign: 'center', paddingBottom: 8 }}>
+                            {error && (
+                                <div style={{ color: T.red500, fontSize: 13, marginBottom: 10 }}>{error}</div>
+                            )}
+                            <button
+                                onClick={handleGenerate}
+                                disabled={generating}
+                                style={{
+                                    background: 'transparent',
+                                    color: generating ? T.muted : T.green800,
+                                    border: `1.5px solid ${generating ? T.border : T.green800}`,
+                                    borderRadius: 12,
+                                    padding: '11px 24px',
+                                    fontSize: 13,
+                                    fontWeight: 600,
+                                    cursor: generating ? 'not-allowed' : 'pointer',
+                                    width: '100%',
+                                }}
+                            >
+                                {generating ? 'Regenerating...' : '🔄 Regenerate Recommendation'}
+                            </button>
+                            <div style={{ fontSize: 11, color: T.muted, marginTop: 6 }}>
+                                Use this after entering new soil lab data
+                            </div>
+                        </div>
                     </>
                 )}
 

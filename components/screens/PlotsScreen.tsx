@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { T } from '@/lib/tokens';
 import Icon from '@/components/ui/Icon';
 
-export default function PlotsScreen({ navigate }: { navigate: (s: string, data?: { cycleId?: string }) => void }) {
+export default function PlotsScreen({ navigate }: { navigate: (s: string, data?: { cycleId?: string; plotId?: string; plotName?: string }) => void }) {
     const [plots, setPlots] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -47,7 +47,6 @@ export default function PlotsScreen({ navigate }: { navigate: (s: string, data?:
             alert('Failed to delete plot. Please try again.');
         }
     }
-
 
     return (
         <div style={{ flex: 1, overflowY: 'auto' }}>
@@ -142,6 +141,7 @@ export default function PlotsScreen({ navigate }: { navigate: (s: string, data?:
                             }
                         }}
                     >
+                        {/* Top row — name + delete button */}
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                             <div>
                                 <div style={{ fontSize: 15, fontWeight: 600, color: T.text }}>{plot.plotName}</div>
@@ -172,11 +172,8 @@ export default function PlotsScreen({ navigate }: { navigate: (s: string, data?:
                             </div>
                         </div>
 
-                        <div style={{
-                            marginTop: 12,
-                            display: 'flex',
-                            gap: 8,
-                        }}>
+                        {/* Bottom row — water source + soil data + start cycle */}
+                        <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
                             <div style={{
                                 flex: 1,
                                 background: T.green50,
@@ -188,6 +185,24 @@ export default function PlotsScreen({ navigate }: { navigate: (s: string, data?:
                             }}>
                                 💧 {plot.irrigationSourceId}
                             </div>
+                            <button
+                                onClick={e => {
+                                    e.stopPropagation();
+                                    navigate('soil-entry', { plotId: plot.id, plotName: plot.plotName });
+                                }}
+                                style={{
+                                    background: T.surface,
+                                    color: T.green800,
+                                    border: `1px solid ${T.green800}`,
+                                    borderRadius: 10,
+                                    padding: '8px 14px',
+                                    fontSize: 12,
+                                    fontWeight: 500,
+                                    cursor: 'pointer',
+                                }}
+                            >
+                                Soil Data
+                            </button>
                             <button
                                 onClick={e => {
                                     e.stopPropagation();
