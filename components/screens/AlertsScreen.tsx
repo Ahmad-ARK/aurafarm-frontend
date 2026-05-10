@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { T } from '@/lib/tokens';
+import Icon from '@/components/ui/Icon';
 
 const API = 'https://aurafarm-production-1691.up.railway.app';
 
@@ -82,7 +83,11 @@ export default function AlertsScreen({ navigate }: Props) {
                         padding: '40px 20px',
                         textAlign: 'center',
                     }}>
-                        <div style={{ fontSize: 40, marginBottom: 12 }}>✅</div>
+                        <div style={{ marginBottom: 12, display: 'flex', justifyContent: 'center' }}>
+                            <div style={{ background: T.green800, borderRadius: 14, padding: 10 }}>
+                                <Icon name="check" size={32} color="white" />
+                            </div>
+                        </div>
                         <div style={{ fontSize: 15, fontWeight: 600, color: T.text, marginBottom: 6 }}>
                             No active alerts
                         </div>
@@ -139,7 +144,10 @@ export default function AlertsScreen({ navigate }: Props) {
 
                             {/* Plot + cycle */}
                             <div style={{ fontSize: 12, color: T.muted, marginBottom: 12 }}>
-                                📍 {alert.cycle?.plot?.plotName || 'Plot'} · triggered at {Number(alert.triggerTempC).toFixed(1)}°C, {Number(alert.triggerHumidityPct).toFixed(0)}% humidity
+                                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                                    <Icon name="mapPin" size={12} color={T.muted} />
+                                    {alert.cycle?.plot?.plotName || 'Plot'} · triggered at
+                                </span> {Number(alert.triggerTempC).toFixed(1)}°C, {Number(alert.triggerHumidityPct).toFixed(0)}% humidity
                             </div>
 
                             {/* Actions */}

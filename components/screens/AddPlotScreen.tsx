@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import dynamic from 'next/dynamic';
 import { T } from '@/lib/tokens';
+import Icon from '@/components/ui/Icon';
 
 const MapPicker = dynamic<{ onLocationSelect: (lat: number, lng: number) => void }>(
     () => import('@/components/ui/MapPicker'),
@@ -61,7 +62,7 @@ export default function AddPlotScreen({ navigate }: Props) {
             if (detectedProvince) {
                 setProvince(detectedProvince);
                 setDistrict(detectedDistrict);
-                setLocationLabel(`📍 ${detectedDistrict ? detectedDistrict + ', ' : ''}${detectedProvince}`);
+                setLocationLabel(`${detectedDistrict ? detectedDistrict + ', ' : ''}${detectedProvince}`);
             } else {
                 setLocationLabel('');
                 setLocationFailed(true);
@@ -164,8 +165,8 @@ export default function AddPlotScreen({ navigate }: Props) {
 
                     {/* Auto-detected location */}
                     {locationLabel && (
-                        <div style={{ marginTop: 8, fontSize: 13, color: T.green800, fontWeight: 500 }}>
-                            {locationLabel}
+                        <div style={{ marginTop: 8, fontSize: 13, color: T.green800, fontWeight: 500, display: 'flex', alignItems: 'center', gap: 6 }}>
+                            <Icon name="mapPin" size={13} color={T.green800} /> {locationLabel}
                         </div>
                     )}
 

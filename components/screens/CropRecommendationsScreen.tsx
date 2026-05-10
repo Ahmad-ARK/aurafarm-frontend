@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { T } from '@/lib/tokens';
+import Icon from '@/components/ui/Icon';
 
 const MONTH_NAMES = [
     '', 'January', 'February', 'March', 'April', 'May', 'June',
@@ -99,7 +100,9 @@ function CropCard({ crop, muted = false }: { crop: any; muted?: boolean }) {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <div>
                     <div style={{ fontSize: 18, fontWeight: 700, color: T.text }}>
-                        {crop.emoji} {crop.name}
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+                            <Icon name="crop" size={18} color={T.green700} /> {crop.name}
+                        </span>
                     </div>
                     <div style={{ fontSize: 13, color: T.muted, marginTop: 2 }}>{crop.urdu}</div>
                 </div>

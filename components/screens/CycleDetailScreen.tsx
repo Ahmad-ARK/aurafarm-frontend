@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { T } from '@/lib/tokens';
+import Icon from '@/components/ui/Icon';
 
 const TOMATO_STAGES = [
     { number: 1, name: 'Establishment', days: '0–30' },
@@ -125,7 +126,7 @@ export default function CycleDetailScreen({ cycleId, navigate }: Props) {
 
                     {isPreTransplant ? (
                         <div style={{ textAlign: 'center', padding: '12px 0' }}>
-                            <div style={{ fontSize: 32, marginBottom: 8 }}>🌱</div>
+                            <div style={{ marginBottom: 8 }}><Icon name="leaf" size={32} color={T.green700} /></div>
                             <div style={{ fontSize: 13, fontWeight: 600, color: T.text }}>Nursery Period</div>
                             <div style={{ fontSize: 12, color: T.muted, marginTop: 4 }}>
                                 Seedlings will be transplanted in {Math.abs(daysActive)} day{Math.abs(daysActive) !== 1 ? 's' : ''}
@@ -199,7 +200,9 @@ export default function CycleDetailScreen({ cycleId, navigate }: Props) {
                         }}
                     >
                         <div>
-                            <div style={{ fontSize: 14, fontWeight: 600, color: '#E65100' }}>⚠️ Disease Alerts</div>
+                            <div style={{ fontSize: 14, fontWeight: 600, color: '#E65100', display: 'flex', alignItems: 'center', gap: 6 }}>
+                                <Icon name="alert" size={15} color="#E65100" /> Disease Alerts
+                            </div>
                             <div style={{ fontSize: 12, color: '#BF360C', marginTop: 2 }}>
                                 {alertCount} active alert{alertCount > 1 ? 's' : ''}
                             </div>
@@ -220,7 +223,9 @@ export default function CycleDetailScreen({ cycleId, navigate }: Props) {
                         color: T.muted,
                     }}>
                         <div>
-                            <div style={{ fontSize: 14, fontWeight: 600 }}>🌿 Fertilizer Plan</div>
+                            <div style={{ fontSize: 14, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6 }}>
+                                <Icon name="leaf" size={15} color={T.muted} /> Fertilizer Plan
+                            </div>
                             <div style={{ fontSize: 12, marginTop: 2 }}>
                                 Available after transplanting
                             </div>
@@ -242,7 +247,9 @@ export default function CycleDetailScreen({ cycleId, navigate }: Props) {
                         }}
                     >
                         <div>
-                            <div style={{ fontSize: 14, fontWeight: 600 }}>🌿 Fertilizer Plan</div>
+                            <div style={{ fontSize: 14, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6 }}>
+                                <Icon name="leaf" size={15} color="white" /> Fertilizer Plan
+                            </div>
                             <div style={{ fontSize: 12, opacity: 0.8, marginTop: 2 }}>
                                 {hasFertRec ? 'View recommendation' : 'Generate recommendation'}
                             </div>
@@ -267,7 +274,9 @@ export default function CycleDetailScreen({ cycleId, navigate }: Props) {
                         }}
                     >
                         <div>
-                            <div style={{ fontSize: 14, fontWeight: 600, color: T.text }}>🔍 Scan Leaf for Disease</div>
+                            <div style={{ fontSize: 14, fontWeight: 600, color: T.text, display: 'flex', alignItems: 'center', gap: 6 }}>
+                                <Icon name="search" size={15} color={T.text} /> Scan Leaf for Disease
+                            </div>
                             <div style={{ fontSize: 12, color: T.muted, marginTop: 2 }}>
                                 Upload a photo to detect disease with AI
                             </div>

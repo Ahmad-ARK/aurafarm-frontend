@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { T } from '@/lib/tokens';
+import Icon from '@/components/ui/Icon';
 
 const API = 'https://aurafarm-production-1691.up.railway.app';
 
@@ -90,7 +91,10 @@ export default function SoilEntryScreen({ plotId, plotName, navigate }: Props) {
                 <div style={{ fontSize: 20, fontWeight: 700 }}>Soil Lab Data</div>
                 <div style={{ fontSize: 13, opacity: 0.8, marginTop: 4 }}>{plotName}</div>
                 <div style={{ marginTop: 12, background: 'rgba(255,255,255,0.15)', borderRadius: 10, padding: '10px 14px', fontSize: 12 }}>
-                    💡 Entering your lab test results gives the most accurate fertilizer recommendations. Only pH is required.
+                    <span style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+                        <Icon name="info" size={14} color="white" />
+                        Entering your lab test results gives the most accurate fertilizer recommendations. Only pH is required.
+                    </span>
                 </div>
             </div>
 

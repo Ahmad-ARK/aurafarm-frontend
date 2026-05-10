@@ -2,18 +2,18 @@
 
 import { useState, useEffect } from 'react';
 import { T } from '@/lib/tokens';
+import Icon from '@/components/ui/Icon';
 
 const API = 'https://aurafarm-production-1691.up.railway.app';
 
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-function getWeatherEmoji(tempMax: number, rainfall: number, humidity: number): string {
-    if (rainfall > 5) return '🌧️';
-    if (rainfall > 0) return '🌦️';
-    if (humidity > 80) return '🌫️';
-    if (tempMax > 38) return '🌡️';
-    if (tempMax > 30) return '☀️';
-    return '⛅';
+function getWeatherIconName(tempMax: number, rainfall: number, humidity: number): string {
+    if (rainfall > 5) return 'cloudRain';
+    if (rainfall > 0) return 'cloudRain';
+    if (humidity > 80) return 'cloud';
+    if (tempMax > 30) return 'sun';
+    return 'cloud';
 }
 
 type Props = {
@@ -117,7 +117,7 @@ export default function WeatherScreen({ navigate }: Props) {
                 >
                     {plots.map(p => (
                         <option key={p.id} value={p.id} style={{ color: T.text, background: 'white' }}>
-                            📍 {p.plotName || 'Unnamed Plot'}
+                            {p.plotName || 'Unnamed Plot'}
                         </option>
                     ))}
                 </select>
@@ -129,9 +129,11 @@ export default function WeatherScreen({ navigate }: Props) {
                 ) : (
                     <>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginTop: 8 }}>
-                            <div style={{ fontSize: 64 }}>
-                                {today ? getWeatherEmoji(today.tempMaxC, today.rainfallMm, today.humidityPct) : '☀️'}
-                            </div>
+                            <Icon
+                                name={today ? getWeatherIconName(today.tempMaxC, today.rainfallMm, today.humidityPct) : 'sun'}
+                                size={64}
+                                color="white"
+                            />
                             <div>
                                 <div style={{ fontSize: 48, fontWeight: 700, lineHeight: 1 }}>
                                     {today ? Math.round(today.tempAvgC) : '--'}°C
@@ -197,8 +199,8 @@ export default function WeatherScreen({ navigate }: Props) {
                                     <div style={{ width: 44, fontSize: 13, fontWeight: i === 0 ? 600 : 400, color: i === 0 ? T.green800 : T.text }}>
                                         {dayLabel}
                                     </div>
-                                    <div style={{ fontSize: 22, width: 32 }}>
-                                        {getWeatherEmoji(day.tempMaxC, day.rainfallMm, day.humidityPct)}
+                                    <div style={{ width: 32 }}>
+                                        <Icon name={getWeatherIconName(day.tempMaxC, day.rainfallMm, day.humidityPct)} size={22} color="#1976D2" />
                                     </div>
                                     <div style={{ flex: 1 }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -230,7 +232,10 @@ export default function WeatherScreen({ navigate }: Props) {
                     fontSize: 13,
                     color: '#92400E',
                 }}>
-                    💡 High humidity (&gt;80%) for consecutive days increases disease risk. Check your alerts regularly.
+                    <span style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+                        <Icon name="info" size={14} color="#92400E" />
+                        High humidity (&gt;80%) for consecutive days increases disease risk. Check your alerts regularly.
+                    </span>
                 </div>
 
             </div>

@@ -2,19 +2,20 @@
 
 import { useState, useEffect } from 'react';
 import { T } from '@/lib/tokens';
+import Icon from '@/components/ui/Icon';
 
 const API = 'https://aurafarm-production-1691.up.railway.app';
 
 // Valid transplant months (1-indexed) per farming type — Pakistan tomato seasons
 const SEASONAL_WINDOWS: Record<string, number[]> = {
-    OPEN_FIELD:      [2, 3, 7, 8],            // Feb–Mar (spring), Jul–Aug (autumn)
-    TUNNEL_SIMPLE:   [1, 2, 3, 4, 7, 8, 9],   // Jan–Apr, Jul–Sep
+    OPEN_FIELD: [2, 3, 7, 8],            // Feb–Mar (spring), Jul–Aug (autumn)
+    TUNNEL_SIMPLE: [1, 2, 3, 4, 7, 8, 9],   // Jan–Apr, Jul–Sep
     TUNNEL_ADVANCED: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12], // almost year-round
 };
 
 const FARMING_TYPE_LABEL: Record<string, string> = {
-    OPEN_FIELD:      'Open Field',
-    TUNNEL_SIMPLE:   'Simple Tunnel (Low Tunnel)',
+    OPEN_FIELD: 'Open Field',
+    TUNNEL_SIMPLE: 'Simple Tunnel (Low Tunnel)',
     TUNNEL_ADVANCED: 'Advanced Tunnel (High Tunnel)',
 };
 
@@ -154,7 +155,9 @@ export default function StartCycleScreen({ navigate }: { navigate: (s: string) =
                     {/* Show farming type as a hint */}
                     {farmingTypeId && (
                         <div style={{ fontSize: 12, color: T.muted, paddingLeft: 2 }}>
-                            📍 {FARMING_TYPE_LABEL[farmingTypeId] || farmingTypeId}
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                                <Icon name="mapPin" size={12} color={T.muted} /> {FARMING_TYPE_LABEL[farmingTypeId] || farmingTypeId}
+                            </span>
                         </div>
                     )}
                 </div>
@@ -167,7 +170,9 @@ export default function StartCycleScreen({ navigate }: { navigate: (s: string) =
                         border: `1.5px solid ${T.border}`, borderRadius: 12,
                         background: '#F9F9F9', color: T.muted,
                     }}>
-                        🍅 Tomato
+                        <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <Icon name="leaf" size={16} color={T.muted} /> Tomato
+                        </span>
                     </div>
                 </div>
 

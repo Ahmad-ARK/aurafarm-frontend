@@ -2,6 +2,7 @@
 
 import { useState, useRef } from 'react';
 import { T } from '@/lib/tokens';
+import Icon from '@/components/ui/Icon';
 
 const ML_API = 'https://m-hussnain4646--tomato-disease-api-fastapi-app.modal.run';
 
@@ -84,7 +85,9 @@ export default function DiseaseCheckScreen({ navigate }: Props) {
                 padding: '20px 20px 28px',
                 color: 'white',
             }}>
-                <div style={{ fontSize: 20, fontWeight: 700 }}>🔍 Leaf Disease Scan</div>
+                <div style={{ fontSize: 20, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <Icon name="search" size={20} color="white" /> Leaf Disease Scan
+                </div>
                 <div style={{ fontSize: 13, opacity: 0.8, marginTop: 4 }}>
                     Take a clear photo of a tomato leaf to detect disease
                 </div>
@@ -113,7 +116,7 @@ export default function DiseaseCheckScreen({ navigate }: Props) {
                         />
                     ) : (
                         <>
-                            <div style={{ fontSize: 40, marginBottom: 12 }}>📷</div>
+                            <div style={{ marginBottom: 12 }}><Icon name="camera" size={40} color={T.muted} /></div>
                             <div style={{ fontSize: 14, fontWeight: 600, color: T.text }}>
                                 Tap to take or upload photo
                             </div>
@@ -150,7 +153,10 @@ export default function DiseaseCheckScreen({ navigate }: Props) {
                             width: '100%',
                         }}
                     >
-                        {scanning ? '🔄 Analyzing leaf...' : '🔍 Scan for Disease'}
+                        <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                            <Icon name={scanning ? 'refresh' : 'search'} size={16} color="white" />
+                            {scanning ? 'Analyzing leaf...' : 'Scan for Disease'}
+                        </span>
                     </button>
                 )}
 
@@ -177,7 +183,10 @@ export default function DiseaseCheckScreen({ navigate }: Props) {
                         fontSize: 13,
                         color: '#F57F17',
                     }}>
-                        ⚠️ Low confidence ({result!.confidence.toFixed(1)}%) — please use a clearer, well-lit photo of the affected leaf.
+                        <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                            <Icon name="alert" size={14} color="#F57F17" />
+                            Low confidence ({result!.confidence.toFixed(1)}%) — please use a clearer, well-lit photo of the affected leaf.
+                        </span>
                     </div>
                 )}
 
@@ -195,7 +204,10 @@ export default function DiseaseCheckScreen({ navigate }: Props) {
                                 <div>
                                     <div style={{ fontSize: 11, color: T.muted, marginBottom: 4 }}>Detected Disease</div>
                                     <div style={{ fontSize: 18, fontWeight: 700, color: isHealthy ? T.green800 : '#BF360C' }}>
-                                        {isHealthy ? '✅' : '🦠'} {result.prediction}
+                                        <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                            <Icon name={isHealthy ? 'check' : 'bug'} size={18} color={isHealthy ? T.green800 : '#BF360C'} />
+                                            {result.prediction}
+                                        </span>
                                     </div>
                                     {diseaseInfo?.urdu && (
                                         <div style={{ fontSize: 13, color: T.muted, marginTop: 2 }}>
@@ -236,7 +248,7 @@ export default function DiseaseCheckScreen({ navigate }: Props) {
                                         padding: '3px 8px',
                                         color: diseaseInfo.cure ? T.green800 : '#BF360C',
                                     }}>
-                                        {diseaseInfo.cure ? '✓ Treatable' : '✗ No cure'}
+                                        {diseaseInfo.cure ? 'Treatable' : 'No cure'}
                                     </span>
                                 </div>
                             )}
@@ -272,7 +284,9 @@ export default function DiseaseCheckScreen({ navigate }: Props) {
                                 width: '100%',
                             }}
                         >
-                            📷 Scan Another Leaf
+                            <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                                <Icon name="camera" size={15} color={T.green800} /> Scan Another Leaf
+                            </span>
                         </button>
                     </>
                 )}

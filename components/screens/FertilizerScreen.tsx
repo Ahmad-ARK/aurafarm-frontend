@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { T } from '@/lib/tokens';
+import Icon from '@/components/ui/Icon';
 
 const API = 'https://aurafarm-production-1691.up.railway.app';
 
@@ -86,7 +87,7 @@ export default function FertilizerScreen({ cycleId, navigate }: Props) {
                         padding: '28px 20px',
                         textAlign: 'center',
                     }}>
-                        <div style={{ fontSize: 40, marginBottom: 12 }}>🌿</div>
+                        <div style={{ marginBottom: 12 }}><Icon name="leaf" size={40} color={T.green700} /></div>
                         <div style={{ fontSize: 15, fontWeight: 600, color: T.text, marginBottom: 8 }}>
                             No recommendation yet
                         </div>
@@ -238,7 +239,9 @@ export default function FertilizerScreen({ cycleId, navigate }: Props) {
                                     width: '100%',
                                 }}
                             >
-                                {generating ? 'Regenerating...' : '🔄 Regenerate Recommendation'}
+                                <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                                    {generating ? <><Icon name="refresh" size={14} color={generating ? T.muted : T.green800} /> Regenerating...</> : <><Icon name="refresh" size={14} color={T.green800} /> Regenerate Recommendation</>}
+                                </span>
                             </button>
                             <div style={{ fontSize: 11, color: T.muted, marginTop: 6 }}>
                                 Use this after entering new soil lab data

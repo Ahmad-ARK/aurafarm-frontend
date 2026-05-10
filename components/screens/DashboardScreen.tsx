@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { T } from "@/lib/tokens";
+import Icon from '@/components/ui/Icon';
 
 export default function DashboardScreen({ navigate }: { navigate: (s: string, data?: { cycleId?: string }) => void }) {
     const farmerName = localStorage.getItem('farmerName') || 'Farmer';
@@ -50,7 +51,7 @@ export default function DashboardScreen({ navigate }: { navigate: (s: string, da
                 background: `linear-gradient(160deg, ${T.green900} 0%, ${T.green700} 100%)`,
                 padding: '48px 20px 24px',
             }}>
-                <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: 13 }}>Good morning 👋</div>
+                <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: 13 }}>Good morning</div>
                 <div style={{ color: 'white', fontSize: 20, fontWeight: 700, marginTop: 2 }}>{farmerName}</div>
 
                 {/* Weather card */}
@@ -72,7 +73,7 @@ export default function DashboardScreen({ navigate }: { navigate: (s: string, da
                         <>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                                 <div style={{ fontSize: 28 }}>
-                                    {weather.rainfallMm > 5 ? '🌧️' : weather.humidityPct > 80 ? '🌫️' : weather.tempMaxC > 30 ? '☀️' : '⛅'}
+                                    <Icon name={weather.rainfallMm > 5 ? 'cloudRain' : weather.humidityPct > 80 ? 'cloud' : 'sun'} size={28} color="white" />
                                 </div>
                                 <div>
                                     <div style={{ fontSize: 20, fontWeight: 700 }}>{Math.round(weather.tempAvgC)}°C</div>
@@ -84,7 +85,9 @@ export default function DashboardScreen({ navigate }: { navigate: (s: string, da
                             <div style={{ fontSize: 12, opacity: 0.7 }}>7-day ›</div>
                         </>
                     ) : (
-                        <div style={{ fontSize: 14, opacity: 0.8 }}>☀️ Add a plot to see weather</div>
+                        <div style={{ fontSize: 14, opacity: 0.8, display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <Icon name="sun" size={16} color="white" /> Add a plot to see weather
+                        </div>
                     )}
                 </div>
             </div>
@@ -150,7 +153,7 @@ export default function DashboardScreen({ navigate }: { navigate: (s: string, da
                             { label: 'Add New Plot', screen: 'add-plot' },
                             { label: 'Start Cycle', screen: 'start-cycle' },
                             { label: 'My Plots', screen: 'plots' },
-                            { label: '🌤️ Weather', screen: 'weather' },
+                            { label: 'Weather', screen: 'weather', icon: 'sun' },
                         ].map((action) => (
                             <div
                                 key={action.screen}
@@ -166,7 +169,10 @@ export default function DashboardScreen({ navigate }: { navigate: (s: string, da
                                     color: T.text,
                                 }}
                             >
-                                {action.label}
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                    {(action as any).icon && <Icon name={(action as any).icon} size={16} color={T.text} />}
+                                    {action.label}
+                                </div>
                             </div>
                         ))}
                     </div>
@@ -187,7 +193,9 @@ export default function DashboardScreen({ navigate }: { navigate: (s: string, da
                     }}
                 >
                     <div>
-                        <div style={{ fontSize: 14, fontWeight: 600, color: T.text }}>🗓️ Crop Recommendations</div>
+                        <div style={{ fontSize: 14, fontWeight: 600, color: T.text, display: 'flex', alignItems: 'center', gap: 6 }}>
+                            <Icon name="calendar" size={16} color={T.text} /> Crop Recommendations
+                        </div>
                         <div style={{ fontSize: 12, color: T.muted, marginTop: 2 }}>
                             Best crops to plant this month in your region
                         </div>
