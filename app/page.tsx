@@ -15,6 +15,8 @@ import AlertsScreen from '@/components/screens/AlertsScreen';
 import WeatherScreen from '@/components/screens/WeatherScreen';
 import RegisterScreen from '@/components/screens/RegisterScreen';
 import SoilEntryScreen from "@/components/screens/SoilEntryScreen";
+import DiseaseCheckScreen from '@/components/screens/DiseaseCheckScreen';
+import CropRecommendationsScreen from '@/components/screens/CropRecommendationsScreen';
 
 export default function Home() {
   const [screen, setScreen] = useState('login');
@@ -67,6 +69,10 @@ export default function Home() {
         return <RegisterScreen navigate={navigate} />;
       case 'soil-entry':
         return <SoilEntryScreen plotId={extras.plotId || ''} plotName={extras.plotName || ''} navigate={navigate} />;
+      case 'disease-check':
+        return <DiseaseCheckScreen navigate={navigate} />;
+      case 'crop-recs':
+        return <CropRecommendationsScreen navigate={navigate} />;
       default:
         return <LoginScreen navigate={navigate} />;
     }
@@ -96,7 +102,7 @@ export default function Home() {
         {/* Screen content */}
         <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
           {/* Header for inner screens */}
-          {['add-plot', 'start-cycle', 'fertilizer', 'alerts', 'cycle-detail', 'weather', 'soil-entry'].includes(screen) && (
+          {['add-plot', 'start-cycle', 'fertilizer', 'alerts', 'cycle-detail', 'weather', 'soil-entry', 'disease-check', 'crop-recs'].includes(screen) && (
             <div style={{
               height: 52,
               display: 'flex',
@@ -125,8 +131,9 @@ export default function Home() {
                         : screen === 'cycle-detail' ? 'Crop Cycle'
                           : screen === 'weather' ? '7-Day Forecast'
                             : screen === 'soil-entry' ? 'Soil Lab Data'
-                              : screen === 'soil-entry' ? 'Soil Lab Data'
-                                : ''}
+                              : screen === 'disease-check' ? 'Disease Scan'
+                                : screen === 'crop-recs' ? 'Crop Recommendations'
+                                  : ''}
               </span>
             </div>
           )}

@@ -172,6 +172,29 @@ export default function DashboardScreen({ navigate }: { navigate: (s: string, da
                     </div>
                 </div>
 
+                {/* Crop Recommendations */}
+                <div
+                    onClick={() => navigate('crop-recs')}
+                    style={{
+                        background: T.surface,
+                        border: `1.5px solid ${T.border}`,
+                        borderRadius: 14,
+                        padding: '16px',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        cursor: 'pointer',
+                    }}
+                >
+                    <div>
+                        <div style={{ fontSize: 14, fontWeight: 600, color: T.text }}>🗓️ Crop Recommendations</div>
+                        <div style={{ fontSize: 12, color: T.muted, marginTop: 2 }}>
+                            Best crops to plant this month in your region
+                        </div>
+                    </div>
+                    <div style={{ fontSize: 20, color: T.muted }}>›</div>
+                </div>
+
             </div>
         </div>
     );

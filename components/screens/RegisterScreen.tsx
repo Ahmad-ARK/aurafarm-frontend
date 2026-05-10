@@ -9,6 +9,18 @@ type Props = {
     navigate: (s: string) => void;
 };
 
+const DISTRICTS: Record<string, string[]> = {
+    PUNJAB: ['Lahore', 'Faisalabad', 'Rawalpindi', 'Gujranwala', 'Multan', 'Sialkot',
+        'Bahawalpur', 'Sargodha', 'Okara', 'Sahiwal', 'Sheikhupura', 'Gujrat',
+        'Rahim Yar Khan', 'Kasur', 'Dera Ghazi Khan'],
+    SINDH: ['Karachi', 'Hyderabad', 'Sukkur', 'Larkana', 'Mirpurkhas',
+        'Nawabshah', 'Thatta', 'Khairpur', 'Jacobabad', 'Shikarpur'],
+    KPK: ['Peshawar', 'Mardan', 'Swat', 'Abbottabad', 'Mansehra',
+        'Nowshera', 'Charsadda', 'Kohat', 'Bannu', 'Dera Ismail Khan'],
+    BALOCHISTAN: ['Quetta', 'Turbat', 'Khuzdar', 'Gwadar', 'Hub',
+        'Loralai', 'Zhob', 'Pishin', 'Chaman', 'Sibi'],
+};
+
 export default function RegisterScreen({ navigate }: Props) {
     const [step, setStep] = useState(1); // 2-step form
     const [loading, setLoading] = useState(false);
@@ -22,6 +34,8 @@ export default function RegisterScreen({ navigate }: Props) {
     // Step 2 fields
     const [experience, setExperience] = useState('');
     const [language, setLanguage] = useState('ur');
+    const [province, setProvince] = useState('');
+    const [district, setDistrict] = useState('');
 
     async function handleRegister() {
         setLoading(true);
@@ -36,6 +50,8 @@ export default function RegisterScreen({ navigate }: Props) {
                 password,
                 preferredLanguage: language,
                 farmingExperienceYears: experience ? parseInt(experience) : undefined,
+                province: province || undefined,
+                district: district || undefined,
             }),
         });
 
@@ -47,6 +63,8 @@ export default function RegisterScreen({ navigate }: Props) {
             localStorage.setItem('token', data.token);
             localStorage.setItem('farmerId', data.farmer.id);
             localStorage.setItem('farmerName', data.farmer.fullName);
+            if (province) localStorage.setItem('farmerProvince', province);
+            if (district) localStorage.setItem('farmerDistrict', district);
             navigate('dashboard');
         } else {
             if (data.error === 'PHONE_ALREADY_REGISTERED') {
@@ -180,9 +198,40 @@ export default function RegisterScreen({ navigate }: Props) {
                     </>
                 )}
 
-                {/* Step 2 — optional info */}
+                {/* Step 2 — location & preferences */}
                 {step === 2 && (
                     <>
+                        <div>
+                            <label style={labelStyle}>Province</label>
+                            <select
+                                style={inputStyle}
+                                value={province}
+                                onChange={e => { setProvince(e.target.value); setDistrict(''); }}
+                            >
+                                <option value="">Select province</option>
+                                <option value="PUNJAB">Punjab</option>
+                                <option value="SINDH">Sindh</option>
+                                <option value="KPK">KPK (Khyber Pakhtunkhwa)</option>
+                                <option value="BALOCHISTAN">Balochistan</option>
+                            </select>
+                        </div>
+
+                        {province && (
+                            <div>
+                                <label style={labelStyle}>District</label>
+                                <select
+                                    style={inputStyle}
+                                    value={district}
+                                    onChange={e => setDistrict(e.target.value)}
+                                >
+                                    <option value="">Select district</option>
+                                    {DISTRICTS[province].map(d => (
+                                        <option key={d} value={d}>{d}</option>
+                                    ))}
+                                </select>
+                            </div>
+                        )}
+
                         <div>
                             <label style={labelStyle}>Farming Experience (years)</label>
                             <input

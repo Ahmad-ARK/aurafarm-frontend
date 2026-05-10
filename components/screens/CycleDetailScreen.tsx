@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import { T } from '@/lib/tokens';
 
 const TOMATO_STAGES = [
-    { number: 0, name: 'Nursery', days: '-30 to -1' },
     { number: 1, name: 'Establishment', days: '0–30' },
     { number: 2, name: 'Flowering', days: '31–60' },
     { number: 3, name: 'Fruit Bulking', days: '61–95' },
@@ -69,6 +68,7 @@ export default function CycleDetailScreen({ cycleId, navigate }: Props) {
         day: 'numeric', month: 'short', year: 'numeric',
     });
 
+    const isPreTransplant = daysActive < 0;
     const alertCount = cycle.diseaseAlerts?.length || 0;
     const hasFertRec = cycle.fertRecs?.length > 0;
 
@@ -91,8 +91,12 @@ export default function CycleDetailScreen({ cycleId, navigate }: Props) {
                         padding: '10px 14px',
                         flex: 1,
                     }}>
-                        <div style={{ fontSize: 11, opacity: 0.7 }}>Days Active</div>
-                        <div style={{ fontSize: 20, fontWeight: 700 }}>{daysActive}</div>
+                        <div style={{ fontSize: 11, opacity: 0.7 }}>
+                            {isPreTransplant ? 'Transplant In' : 'Days Since Transplant'}
+                        </div>
+                        <div style={{ fontSize: 20, fontWeight: 700 }}>
+                            {isPreTransplant ? `${Math.abs(daysActive)} days` : daysActive}
+                        </div>
                     </div>
                     <div style={{
                         background: 'rgba(255,255,255,0.15)',
@@ -119,57 +123,67 @@ export default function CycleDetailScreen({ cycleId, navigate }: Props) {
                         Growth Stages
                     </div>
 
-                    {TOMATO_STAGES.map((stage, i) => {
-                        const isActive = currentStage?.stageNumber === stage.number;
-                        const isPast = currentStage ? stage.number < currentStage.stageNumber : false;
-
-                        return (
-                            <div
-                                key={stage.number}
-                                style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: 12,
-                                    marginBottom: i < TOMATO_STAGES.length - 1 ? 10 : 0,
-                                }}
-                            >
-                                <div style={{
-                                    width: 12, height: 12,
-                                    borderRadius: '50%',
-                                    background: isActive ? T.green800 : isPast ? T.green400 : T.border,
-                                    flexShrink: 0,
-                                    outline: isActive ? `3px solid ${T.green100}` : 'none',
-                                }} />
-
-                                <div style={{ flex: 1 }}>
-                                    <div style={{
-                                        fontSize: 13,
-                                        fontWeight: isActive ? 600 : 400,
-                                        color: isActive ? T.green900 : isPast ? T.text : T.muted,
-                                    }}>
-                                        {stage.name}
-                                    </div>
-                                    <div style={{ fontSize: 11, color: T.muted }}>Day {stage.days}</div>
-                                </div>
-
-                                {isActive && (
-                                    <div style={{
-                                        background: T.green50,
-                                        color: T.green800,
-                                        fontSize: 11,
-                                        fontWeight: 600,
-                                        padding: '3px 8px',
-                                        borderRadius: 6,
-                                    }}>
-                                        Current
-                                    </div>
-                                )}
+                    {isPreTransplant ? (
+                        <div style={{ textAlign: 'center', padding: '12px 0' }}>
+                            <div style={{ fontSize: 32, marginBottom: 8 }}>🌱</div>
+                            <div style={{ fontSize: 13, fontWeight: 600, color: T.text }}>Nursery Period</div>
+                            <div style={{ fontSize: 12, color: T.muted, marginTop: 4 }}>
+                                Seedlings will be transplanted in {Math.abs(daysActive)} day{Math.abs(daysActive) !== 1 ? 's' : ''}
                             </div>
-                        );
-                    })}
+                        </div>
+                    ) : (
+                        TOMATO_STAGES.map((stage, i) => {
+                            const isActive = currentStage?.stageNumber === stage.number;
+                            const isPast = currentStage ? stage.number < currentStage.stageNumber : false;
+
+                            return (
+                                <div
+                                    key={stage.number}
+                                    style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: 12,
+                                        marginBottom: i < TOMATO_STAGES.length - 1 ? 10 : 0,
+                                    }}
+                                >
+                                    <div style={{
+                                        width: 12, height: 12,
+                                        borderRadius: '50%',
+                                        background: isActive ? T.green800 : isPast ? T.green400 : T.border,
+                                        flexShrink: 0,
+                                        outline: isActive ? `3px solid ${T.green100}` : 'none',
+                                    }} />
+
+                                    <div style={{ flex: 1 }}>
+                                        <div style={{
+                                            fontSize: 13,
+                                            fontWeight: isActive ? 600 : 400,
+                                            color: isActive ? T.green900 : isPast ? T.text : T.muted,
+                                        }}>
+                                            {stage.name}
+                                        </div>
+                                        <div style={{ fontSize: 11, color: T.muted }}>Day {stage.days}</div>
+                                    </div>
+
+                                    {isActive && (
+                                        <div style={{
+                                            background: T.green50,
+                                            color: T.green800,
+                                            fontSize: 11,
+                                            fontWeight: 600,
+                                            padding: '3px 8px',
+                                            borderRadius: 6,
+                                        }}>
+                                            Current
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })
+                    )}
                 </div>
 
-                {/* Disease Alerts warning (only shown if there are active alerts) */}
+                {/* Disease Alerts warning */}
                 {alertCount > 0 && (
                     <div
                         onClick={() => navigate('alerts', { cycleId })}
@@ -195,27 +209,73 @@ export default function CycleDetailScreen({ cycleId, navigate }: Props) {
                 )}
 
                 {/* Fertilizer Plan button */}
-                <div
-                    onClick={() => navigate('fertilizer', { cycleId })}
-                    style={{
-                        background: T.green800,
+                {isPreTransplant ? (
+                    <div style={{
+                        background: '#F5F5F5',
                         borderRadius: 14,
                         padding: '16px',
                         display: 'flex',
                         justifyContent: 'space-between',
                         alignItems: 'center',
-                        cursor: 'pointer',
-                        color: 'white',
-                    }}
-                >
-                    <div>
-                        <div style={{ fontSize: 14, fontWeight: 600 }}>🌿 Fertilizer Plan</div>
-                        <div style={{ fontSize: 12, opacity: 0.8, marginTop: 2 }}>
-                            {hasFertRec ? 'View recommendation' : 'Generate recommendation'}
+                        color: T.muted,
+                    }}>
+                        <div>
+                            <div style={{ fontSize: 14, fontWeight: 600 }}>🌿 Fertilizer Plan</div>
+                            <div style={{ fontSize: 12, marginTop: 2 }}>
+                                Available after transplanting
+                            </div>
                         </div>
+                        <div style={{ fontSize: 20 }}>›</div>
                     </div>
-                    <div style={{ fontSize: 20 }}>›</div>
-                </div>
+                ) : (
+                    <div
+                        onClick={() => navigate('fertilizer', { cycleId })}
+                        style={{
+                            background: T.green800,
+                            borderRadius: 14,
+                            padding: '16px',
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            cursor: 'pointer',
+                            color: 'white',
+                        }}
+                    >
+                        <div>
+                            <div style={{ fontSize: 14, fontWeight: 600 }}>🌿 Fertilizer Plan</div>
+                            <div style={{ fontSize: 12, opacity: 0.8, marginTop: 2 }}>
+                                {hasFertRec ? 'View recommendation' : 'Generate recommendation'}
+                            </div>
+                        </div>
+                        <div style={{ fontSize: 20 }}>›</div>
+                    </div>
+                )}
+
+                {/* Disease Scan button */}
+                {!isPreTransplant && (
+                    <div
+                        onClick={() => navigate('disease-check')}
+                        style={{
+                            background: T.surface,
+                            border: `1.5px solid ${T.border}`,
+                            borderRadius: 14,
+                            padding: '16px',
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            cursor: 'pointer',
+                        }}
+                    >
+                        <div>
+                            <div style={{ fontSize: 14, fontWeight: 600, color: T.text }}>🔍 Scan Leaf for Disease</div>
+                            <div style={{ fontSize: 12, color: T.muted, marginTop: 2 }}>
+                                Upload a photo to detect disease with AI
+                            </div>
+                        </div>
+                        <div style={{ fontSize: 20, color: T.muted }}>›</div>
+                    </div>
+                )}
+
 
                 {/* Cycle info card */}
                 <div style={{
