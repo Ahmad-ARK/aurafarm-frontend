@@ -51,7 +51,13 @@ export default function DashboardScreen({ navigate }: { navigate: (s: string, da
                 background: `linear-gradient(160deg, ${T.green900} 0%, ${T.green700} 100%)`,
                 padding: '48px 20px 24px',
             }}>
-                <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: 13 }}>Good morning</div>
+                <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: 13 }}>{(() => {
+                    const h = new Date().getHours();
+                    if (h >= 5 && h < 12) return 'Good morning';
+                    if (h >= 12 && h < 17) return 'Good afternoon';
+                    if (h >= 17 && h < 21) return 'Good evening';
+                    return 'Good night';
+                })()}</div>
                 <div style={{ color: 'white', fontSize: 20, fontWeight: 700, marginTop: 2 }}>{farmerName}</div>
 
                 {/* Weather card */}

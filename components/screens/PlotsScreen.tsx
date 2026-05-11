@@ -150,7 +150,22 @@ export default function PlotsScreen({ navigate }: { navigate: (s: string, data?:
                         {/* Top row — name + delete button */}
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                             <div>
-                                <div style={{ fontSize: 15, fontWeight: 600, color: T.text }}>{plot.plotName}</div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                    <div style={{ fontSize: 15, fontWeight: 600, color: T.text }}>{plot.plotName}</div>
+                                    {plot.cycles?.length > 0 && (
+                                        <div style={{
+                                            background: T.green800,
+                                            color: 'white',
+                                            fontSize: 10,
+                                            fontWeight: 700,
+                                            padding: '2px 7px',
+                                            borderRadius: 20,
+                                            letterSpacing: 0.3,
+                                        }}>
+                                            ACTIVE
+                                        </div>
+                                    )}
+                                </div>
                                 <div style={{ fontSize: 12, color: T.muted, marginTop: 2 }}>
                                     {plot.areaAcres} acres · {FARMING_TYPE_LABEL[plot.farmingTypeId] || plot.farmingTypeId}
                                 </div>
