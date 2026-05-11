@@ -1,10 +1,8 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { T } from '@/lib/tokens';
 import Icon from '@/components/ui/Icon';
-
-const ML_API = 'https://m-hussnain4646--tomato-disease-api-fastapi-app.modal.run';
 
 const DISEASE_INFO: Record<string, { urdu: string; pathogen: string; cure: boolean; action: string }> = {
     'Late Blight': { urdu: 'بدیا جھلساؤ', pathogen: 'Fungal', cure: false, action: 'Apply copper-based fungicide immediately. Remove and destroy infected leaves.' },
@@ -16,17 +14,40 @@ const DISEASE_INFO: Record<string, { urdu: string; pathogen: string; cure: boole
     'Healthy': { urdu: 'صحت مند', pathogen: '', cure: true, action: 'No action needed. Plant appears healthy.' },
 };
 
+type LeafScan = {
+    id: string;
+    prediction: string;
+    confidence: number;
+    scannedAt: string;
+};
+
 type Props = {
+    cycleId?: string;
     navigate: (s: string) => void;
 };
 
-export default function DiseaseCheckScreen({ navigate }: Props) {
+export default function DiseaseCheckScreen({ cycleId, navigate }: Props) {
     const [image, setImage] = useState<string | null>(null);
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [result, setResult] = useState<{ prediction: string; confidence: number } | null>(null);
     const [scanning, setScanning] = useState(false);
     const [error, setError] = useState('');
+    const [history, setHistory] = useState<LeafScan[]>([]);
+    const [loadingHistory, setLoadingHistory] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        if (!cycleId) return;
+        setLoadingHistory(true);
+        const token = localStorage.getItem('token') || '';
+        fetch(`https://aurafarm-production-1691.up.railway.app/api/disease/scans/${cycleId}`, {
+            headers: { Authorization: `Bearer ${token}` },
+        })
+            .then(r => r.json())
+            .then(data => { if (Array.isArray(data)) setHistory(data); })
+            .catch(() => {})
+            .finally(() => setLoadingHistory(false));
+    }, [cycleId]);
 
     function handleImageSelect(e: React.ChangeEvent<HTMLInputElement>) {
         const file = e.target.files?.[0];
@@ -46,10 +67,10 @@ export default function DiseaseCheckScreen({ navigate }: Props) {
 
         const formData = new FormData();
         formData.append('file', imageFile);
+        if (cycleId) formData.append('cycleId', cycleId);
 
         try {
             const token = localStorage.getItem('token') || '';
-
             const res = await fetch('https://aurafarm-production-1691.up.railway.app/api/disease/predict', {
                 method: 'POST',
                 headers: { Authorization: `Bearer ${token}` },
@@ -58,6 +79,17 @@ export default function DiseaseCheckScreen({ navigate }: Props) {
             if (!res.ok) throw new Error('API error');
             const data = await res.json();
             setResult(data);
+
+            // Add to local history immediately
+            if (cycleId) {
+                const newScan: LeafScan = {
+                    id: Date.now().toString(),
+                    prediction: data.prediction,
+                    confidence: data.confidence,
+                    scannedAt: new Date().toISOString(),
+                };
+                setHistory(prev => [newScan, ...prev]);
+            }
         } catch {
             setError('Failed to analyze image. Check your connection and try again.');
         }
@@ -89,7 +121,9 @@ export default function DiseaseCheckScreen({ navigate }: Props) {
                     <Icon name="search" size={20} color="white" /> Leaf Disease Scan
                 </div>
                 <div style={{ fontSize: 13, opacity: 0.8, marginTop: 4 }}>
-                    Take a clear photo of a tomato leaf to detect disease
+                    {cycleId
+                        ? 'Scans are saved to your active crop cycle'
+                        : 'Take a clear photo of a tomato leaf to detect disease'}
                 </div>
             </div>
 
@@ -267,6 +301,12 @@ export default function DiseaseCheckScreen({ navigate }: Props) {
                                     {diseaseInfo.action}
                                 </div>
                             )}
+
+                            {cycleId && (
+                                <div style={{ marginTop: 10, fontSize: 11, color: T.muted, display: 'flex', alignItems: 'center', gap: 4 }}>
+                                    <Icon name="check" size={11} color={T.muted} /> Saved to cycle history
+                                </div>
+                            )}
                         </div>
 
                         {/* Scan again */}
@@ -289,6 +329,75 @@ export default function DiseaseCheckScreen({ navigate }: Props) {
                             </span>
                         </button>
                     </>
+                )}
+
+                {/* Scan History */}
+                {cycleId && (
+                    <div style={{
+                        background: T.surface,
+                        borderRadius: 16,
+                        border: `1px solid ${T.border}`,
+                        padding: '14px 16px',
+                    }}>
+                        <div style={{ fontSize: 14, fontWeight: 600, color: T.text, marginBottom: 12 }}>
+                            Scan History
+                        </div>
+
+                        {loadingHistory && (
+                            <div style={{ fontSize: 13, color: T.muted, textAlign: 'center', padding: '8px 0' }}>
+                                Loading history...
+                            </div>
+                        )}
+
+                        {!loadingHistory && history.length === 0 && (
+                            <div style={{ fontSize: 13, color: T.muted, textAlign: 'center', padding: '8px 0' }}>
+                                No scans yet for this cycle
+                            </div>
+                        )}
+
+                        {history.map((scan, i) => {
+                            const healthy = scan.prediction === 'Healthy';
+                            return (
+                                <div
+                                    key={scan.id}
+                                    style={{
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                        alignItems: 'center',
+                                        paddingTop: i > 0 ? 10 : 0,
+                                        marginTop: i > 0 ? 10 : 0,
+                                        borderTop: i > 0 ? `1px solid ${T.border}` : 'none',
+                                    }}
+                                >
+                                    <div>
+                                        <div style={{
+                                            fontSize: 13,
+                                            fontWeight: 600,
+                                            color: healthy ? T.green800 : '#BF360C',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: 5,
+                                        }}>
+                                            <Icon name={healthy ? 'check' : 'bug'} size={12} color={healthy ? T.green800 : '#BF360C'} />
+                                            {scan.prediction}
+                                        </div>
+                                        <div style={{ fontSize: 11, color: T.muted, marginTop: 2 }}>
+                                            {new Date(scan.scannedAt).toLocaleDateString('en-PK', {
+                                                day: 'numeric', month: 'short', year: 'numeric',
+                                            })}
+                                        </div>
+                                    </div>
+                                    <div style={{
+                                        fontSize: 13,
+                                        fontWeight: 700,
+                                        color: healthy ? T.green800 : '#BF360C',
+                                    }}>
+                                        {Number(scan.confidence).toFixed(1)}%
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
                 )}
 
             </div>

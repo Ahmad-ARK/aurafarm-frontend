@@ -4,6 +4,12 @@ import { useState, useEffect } from 'react';
 import { T } from '@/lib/tokens';
 import Icon from '@/components/ui/Icon';
 
+const FARMING_TYPE_LABEL: Record<string, string> = {
+    OPEN_FIELD: 'Open Field',
+    TUNNEL_SIMPLE: 'Simple Tunnel',
+    TUNNEL_ADVANCED: 'Advanced Tunnel',
+};
+
 export default function PlotsScreen({ navigate }: { navigate: (s: string, data?: { cycleId?: string; plotId?: string; plotName?: string }) => void }) {
     const [plots, setPlots] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
@@ -146,7 +152,7 @@ export default function PlotsScreen({ navigate }: { navigate: (s: string, data?:
                             <div>
                                 <div style={{ fontSize: 15, fontWeight: 600, color: T.text }}>{plot.plotName}</div>
                                 <div style={{ fontSize: 12, color: T.muted, marginTop: 2 }}>
-                                    {plot.areaAcres} acres · {plot.farmingTypeId?.replace('_', ' ')}
+                                    {plot.areaAcres} acres · {FARMING_TYPE_LABEL[plot.farmingTypeId] || plot.farmingTypeId}
                                 </div>
                             </div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -182,8 +188,12 @@ export default function PlotsScreen({ navigate }: { navigate: (s: string, data?:
                                 fontSize: 12,
                                 color: T.green700,
                                 fontWeight: 500,
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 5,
                             }}>
-                                💧 {plot.irrigationSourceId}
+                                <Icon name="cloud" size={12} color={T.green700} />
+                                {plot.irrigationSourceId}
                             </div>
                             <button
                                 onClick={e => {
@@ -191,7 +201,7 @@ export default function PlotsScreen({ navigate }: { navigate: (s: string, data?:
                                     navigate('soil-entry', { plotId: plot.id, plotName: plot.plotName });
                                 }}
                                 style={{
-                                    background: T.surface,
+                                    background: plot.soilData?.length > 0 ? T.green50 : T.surface,
                                     color: T.green800,
                                     border: `1px solid ${T.green800}`,
                                     borderRadius: 10,
@@ -199,14 +209,20 @@ export default function PlotsScreen({ navigate }: { navigate: (s: string, data?:
                                     fontSize: 12,
                                     fontWeight: 500,
                                     cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 4,
                                 }}
                             >
+                                {plot.soilData?.length > 0 && (
+                                    <Icon name="check" size={11} color={T.green800} />
+                                )}
                                 Soil Data
                             </button>
                             <button
                                 onClick={e => {
                                     e.stopPropagation();
-                                    navigate('start-cycle');
+                                    navigate('start-cycle', { plotId: plot.id });
                                 }}
                                 style={{
                                     background: T.green800,

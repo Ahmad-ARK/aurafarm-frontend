@@ -39,6 +39,7 @@ export default function Home() {
     if (history.length > 0) {
       const prev = history[history.length - 1];
       setHistory(h => h.slice(0, -1));
+      setExtras({});
       setScreen(prev);
     }
   }
@@ -54,7 +55,7 @@ export default function Home() {
       case 'plots':
         return <PlotsScreen navigate={navigate} />;
       case 'start-cycle':
-        return <StartCycleScreen navigate={navigate} />;
+        return <StartCycleScreen navigate={navigate} plotId={extras.plotId} />;
       case 'cycle-detail':
         return <CycleDetailScreen cycleId={extras.cycleId || ''} navigate={navigate} />;
       case 'fertilizer':
@@ -70,7 +71,7 @@ export default function Home() {
       case 'soil-entry':
         return <SoilEntryScreen plotId={extras.plotId || ''} plotName={extras.plotName || ''} navigate={navigate} />;
       case 'disease-check':
-        return <DiseaseCheckScreen navigate={navigate} />;
+        return <DiseaseCheckScreen cycleId={extras.cycleId} navigate={navigate} />;
       case 'crop-recs':
         return <CropRecommendationsScreen navigate={navigate} />;
       default:

@@ -33,6 +33,8 @@ export default function ProfileScreen({ navigate }: Props) {
         localStorage.removeItem('token');
         localStorage.removeItem('farmerId');
         localStorage.removeItem('farmerName');
+        localStorage.removeItem('farmerProvince');
+        localStorage.removeItem('farmerDistrict');
         navigate('login');
     }
 

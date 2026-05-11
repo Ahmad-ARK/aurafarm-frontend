@@ -57,7 +57,7 @@ function getSeasonalWarning(
     };
 }
 
-export default function StartCycleScreen({ navigate }: { navigate: (s: string) => void }) {
+export default function StartCycleScreen({ navigate, plotId }: { navigate: (s: string) => void; plotId?: string }) {
     const [plots, setPlots] = useState<any[]>([]);
     const [selectedPlot, setSelectedPlot] = useState('');
     const [npkTier, setNpkTier] = useState('TOMATO_COMMERCIAL');
@@ -76,11 +76,16 @@ export default function StartCycleScreen({ navigate }: { navigate: (s: string) =
             const data = await res.json();
             if (res.ok) {
                 setPlots(data);
-                if (data.length > 0) setSelectedPlot(data[0].id);
+                // Pre-select the plot passed from PlotsScreen, otherwise default to first
+                if (plotId && data.find((p: any) => p.id === plotId)) {
+                    setSelectedPlot(plotId);
+                } else if (data.length > 0) {
+                    setSelectedPlot(data[0].id);
+                }
             }
         }
         loadPlots();
-    }, []);
+    }, [plotId]);
 
     async function handleStart() {
         if (!selectedPlot || !transplantDate) {

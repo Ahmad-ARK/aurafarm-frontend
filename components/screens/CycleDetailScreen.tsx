@@ -13,7 +13,7 @@ const TOMATO_STAGES = [
 
 type Props = {
     cycleId: string;
-    navigate: (s: string, data?: { cycleId?: string }) => void;
+    navigate: (s: string, data?: { cycleId?: string; plotId?: string; plotName?: string }) => void;
 };
 
 export default function CycleDetailScreen({ cycleId, navigate }: Props) {
@@ -23,6 +23,7 @@ export default function CycleDetailScreen({ cycleId, navigate }: Props) {
     const [currentStage, setCurrentStage] = useState<any>(null);
     const [daysActive, setDaysActive] = useState<number>(0);
     const [loading, setLoading] = useState(true);
+    const [completing, setCompleting] = useState(false);
 
     useEffect(() => {
         async function loadData() {
@@ -48,6 +49,27 @@ export default function CycleDetailScreen({ cycleId, navigate }: Props) {
 
         if (cycleId) loadData();
     }, [cycleId]);
+
+    async function handleComplete() {
+        const confirmed = window.confirm(
+            'Mark this cycle as completed (harvested)?\n\nThis cannot be undone. You will be able to start a new cycle on this plot afterwards.'
+        );
+        if (!confirmed) return;
+
+        setCompleting(true);
+        const res = await fetch(
+            `https://aurafarm-production-1691.up.railway.app/api/crop-cycles/${cycleId}/complete`,
+            { method: 'PATCH', headers: { Authorization: `Bearer ${token}` } }
+        );
+        setCompleting(false);
+
+        if (res.ok) {
+            navigate('plots');
+        } else {
+            const data = await res.json();
+            alert(data.error || 'Failed to complete cycle');
+        }
+    }
 
     if (loading) {
         return (
@@ -261,7 +283,7 @@ export default function CycleDetailScreen({ cycleId, navigate }: Props) {
                 {/* Disease Scan button */}
                 {!isPreTransplant && (
                     <div
-                        onClick={() => navigate('disease-check')}
+                        onClick={() => navigate('disease-check', { cycleId })}
                         style={{
                             background: T.surface,
                             border: `1.5px solid ${T.border}`,
@@ -301,6 +323,26 @@ export default function CycleDetailScreen({ cycleId, navigate }: Props) {
                         {cycle.plot?.plotName} · {cycle.plot?.areaAcres} acres
                     </div>
                 </div>
+
+                {/* End Cycle button */}
+                <button
+                    onClick={handleComplete}
+                    disabled={completing}
+                    style={{
+                        background: 'transparent',
+                        color: completing ? T.muted : T.red500,
+                        border: `1.5px solid ${completing ? T.border : T.red500}`,
+                        borderRadius: 14,
+                        padding: '14px 20px',
+                        fontSize: 14,
+                        fontWeight: 600,
+                        cursor: completing ? 'not-allowed' : 'pointer',
+                        width: '100%',
+                        marginTop: 4,
+                    }}
+                >
+                    {completing ? 'Completing...' : 'Mark as Harvested / End Cycle'}
+                </button>
 
             </div>
         </div>
