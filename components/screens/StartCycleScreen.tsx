@@ -23,7 +23,7 @@ function getSeasonalWarning(
     const windows = SEASONAL_WINDOWS[farmingTypeId];
     if (!windows || windows.includes(month)) return null;
 
-    const monthName = (m: number) => tFn(`month_short_${m}`);
+    const monthName = (m: number) => tFn(`month_${m}`);
     const validNames = windows.map(monthName).join(', ');
     const typeLabel = tFn(`type_${farmingTypeId === 'OPEN_FIELD' ? 'open' : farmingTypeId === 'TUNNEL_SIMPLE' ? 'simple' : 'advanced'}`);
     let suggestion = '';
