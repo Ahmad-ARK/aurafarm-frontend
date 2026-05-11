@@ -3,8 +3,10 @@
 import { useState, useEffect } from "react";
 import { T } from "@/lib/tokens";
 import Icon from '@/components/ui/Icon';
+import { useTranslation } from "@/lib/useTranslation";
 
 export default function DashboardScreen({ navigate }: { navigate: (s: string, data?: { cycleId?: string }) => void }) {
+    const { t } = useTranslation();
     const farmerName = localStorage.getItem('farmerName') || 'Farmer';
     const farmerId = localStorage.getItem('farmerId') || '';
     const token = localStorage.getItem('token') || '';
@@ -53,10 +55,10 @@ export default function DashboardScreen({ navigate }: { navigate: (s: string, da
             }}>
                 <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: 13 }}>{(() => {
                     const h = new Date().getHours();
-                    if (h >= 5 && h < 12) return 'Good morning';
-                    if (h >= 12 && h < 17) return 'Good afternoon';
-                    if (h >= 17 && h < 21) return 'Good evening';
-                    return 'Good night';
+                    if (h >= 5 && h < 12) return t('dash_morning');
+                    if (h >= 12 && h < 17) return t('dash_afternoon');
+                    if (h >= 17 && h < 21) return t('dash_evening');
+                    return t('dash_night');
                 })()}</div>
                 <div style={{ color: 'white', fontSize: 20, fontWeight: 700, marginTop: 2 }}>{farmerName}</div>
 
@@ -84,7 +86,7 @@ export default function DashboardScreen({ navigate }: { navigate: (s: string, da
                                 <div>
                                     <div style={{ fontSize: 20, fontWeight: 700 }}>{Math.round(weather.tempAvgC)}°C</div>
                                     <div style={{ fontSize: 12, opacity: 0.8 }}>
-                                        {Math.round(weather.tempMinC)}° – {Math.round(weather.tempMaxC)}° · {weather.humidityPct}% humidity
+                                        {Math.round(weather.tempMinC)}° – {Math.round(weather.tempMaxC)}° · {weather.humidityPct}% {t('dash_humidity')}
                                     </div>
                                 </div>
                             </div>
@@ -92,7 +94,7 @@ export default function DashboardScreen({ navigate }: { navigate: (s: string, da
                         </>
                     ) : (
                         <div style={{ fontSize: 14, opacity: 0.8, display: 'flex', alignItems: 'center', gap: 8 }}>
-                            <Icon name="sun" size={16} color="white" /> Add a plot to see weather
+                            <Icon name="sun" size={16} color="white" /> {t('dash_add_plot_weather')}
                         </div>
                     )}
                 </div>
@@ -103,7 +105,7 @@ export default function DashboardScreen({ navigate }: { navigate: (s: string, da
                 {/* Active Cycles */}
                 <div>
                     <div style={{ fontSize: 15, fontWeight: 600, color: T.text, marginBottom: 12 }}>
-                        Active Cycles
+                        {t('dash_active_cycles')}
                     </div>
 
                     {cycles.length === 0 ? (
@@ -116,12 +118,12 @@ export default function DashboardScreen({ navigate }: { navigate: (s: string, da
                             color: T.muted,
                             fontSize: 14,
                         }}>
-                            No active cycles yet.{' '}
+                            {t('dash_no_cycles')}{' '}
                             <span
                                 onClick={() => navigate('start-cycle')}
                                 style={{ color: T.green800, fontWeight: 600, cursor: 'pointer' }}
                             >
-                                Start one →
+                                {t('dash_start_one')}
                             </span>
                         </div>
                     ) : (
@@ -152,14 +154,14 @@ export default function DashboardScreen({ navigate }: { navigate: (s: string, da
                 {/* Quick Actions */}
                 <div>
                     <div style={{ fontSize: 15, fontWeight: 600, color: T.text, marginBottom: 12 }}>
-                        Quick Actions
+                        {t('dash_quick_actions')}
                     </div>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
                         {[
-                            { label: 'Add New Plot', screen: 'add-plot' },
-                            { label: 'Start Cycle', screen: 'start-cycle' },
-                            { label: 'My Plots', screen: 'plots' },
-                            { label: 'Weather', screen: 'weather', icon: 'sun' },
+                            { label: t('dash_add_plot'), screen: 'add-plot' },
+                            { label: t('dash_start_cycle'), screen: 'start-cycle' },
+                            { label: t('dash_my_plots'), screen: 'plots' },
+                            { label: t('dash_weather'), screen: 'weather', icon: 'sun' },
                         ].map((action) => (
                             <div
                                 key={action.screen}
@@ -200,10 +202,10 @@ export default function DashboardScreen({ navigate }: { navigate: (s: string, da
                 >
                     <div>
                         <div style={{ fontSize: 14, fontWeight: 600, color: T.text, display: 'flex', alignItems: 'center', gap: 6 }}>
-                            <Icon name="calendar" size={16} color={T.text} /> Crop Recommendations
+                            <Icon name="calendar" size={16} color={T.text} /> {t('dash_crop_recs')}
                         </div>
                         <div style={{ fontSize: 12, color: T.muted, marginTop: 2 }}>
-                            Best crops to plant this month in your region
+                            {t('dash_best_crops')}
                         </div>
                     </div>
                     <div style={{ fontSize: 20, color: T.muted }}>›</div>

@@ -1,0 +1,12 @@
+{
+  "appId": "com.aurafarm.app",
+  "appName": "AuraFarm",
+  "webDir": "out",
+  "server": {
+    "androidScheme": "https"
+  },
+  "android": {
+    "allowMixedContent": true,
+    "backgroundColor": "#1a1a1a"
+  }
+}

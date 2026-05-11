@@ -3,10 +3,9 @@
 import { useState, useEffect } from 'react';
 import { T } from '@/lib/tokens';
 import Icon from '@/components/ui/Icon';
+import { useTranslation } from '@/lib/useTranslation';
 
 const API = 'https://aurafarm-production-1691.up.railway.app';
-
-const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 function getWeatherIconName(tempMax: number, rainfall: number, humidity: number): string {
     if (rainfall > 5) return 'cloudRain';
@@ -21,6 +20,7 @@ type Props = {
 };
 
 export default function WeatherScreen({ navigate }: Props) {
+    const { t } = useTranslation();
     const token = localStorage.getItem('token') || '';
     const farmerId = localStorage.getItem('farmerId') || '';
 
@@ -42,7 +42,7 @@ export default function WeatherScreen({ navigate }: Props) {
                 setPlots(data);
                 setSelectedPlot(data[0]);
             } else {
-                setError('No plots found. Add a plot first.');
+                setError(t('weather_no_plots'));
             }
             setLoading(false);
         }
@@ -122,10 +122,10 @@ export default function WeatherScreen({ navigate }: Props) {
                     ))}
                 </select>
 
-                <div style={{ fontSize: 13, opacity: 0.8 }}>Today</div>
+                <div style={{ fontSize: 13, opacity: 0.8 }}>{t('weather_today')}</div>
 
                 {weatherLoading ? (
-                    <div style={{ fontSize: 16, marginTop: 16, opacity: 0.8 }}>Loading weather...</div>
+                    <div style={{ fontSize: 16, marginTop: 16, opacity: 0.8 }}>{t('weather_loading')}</div>
                 ) : (
                     <>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginTop: 8 }}>
@@ -147,9 +147,9 @@ export default function WeatherScreen({ navigate }: Props) {
                         {today && (
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, marginTop: 20 }}>
                                 {[
-                                    { label: 'Humidity', value: `${today.humidityPct}%` },
-                                    { label: 'Rainfall', value: `${today.rainfallMm} mm` },
-                                    { label: 'Wind', value: `${today.windSpeedKmh} km/h` },
+                                    { label: t('weather_humidity'), value: `${today.humidityPct}%` },
+                                    { label: t('weather_rainfall'), value: `${today.rainfallMm} mm` },
+                                    { label: t('weather_wind'), value: `${today.windSpeedKmh} km/h` },
                                 ].map(item => (
                                     <div key={item.label} style={{
                                         background: 'rgba(255,255,255,0.15)',
@@ -178,12 +178,12 @@ export default function WeatherScreen({ navigate }: Props) {
                         overflow: 'hidden',
                     }}>
                         <div style={{ padding: '14px 16px', borderBottom: `1px solid ${T.border}` }}>
-                            <div style={{ fontSize: 14, fontWeight: 600, color: T.text }}>7-Day Forecast</div>
+                            <div style={{ fontSize: 14, fontWeight: 600, color: T.text }}>{t('weather_7day')}</div>
                         </div>
 
                         {forecast.map((day: any, i: number) => {
                             const date = new Date(day.date);
-                            const dayLabel = i === 0 ? 'Today' : DAYS[date.getDay()];
+                            const dayLabel = i === 0 ? t('weather_today') : t(`day_short_${date.getDay()}`);
 
                             return (
                                 <div
@@ -234,7 +234,7 @@ export default function WeatherScreen({ navigate }: Props) {
                 }}>
                     <span style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
                         <Icon name="info" size={14} color="#92400E" />
-                        High humidity (&gt;80%) for consecutive days increases disease risk. Check your alerts regularly.
+                        {t('weather_warning')}
                     </span>
                 </div>
 

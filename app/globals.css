@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Gulzar&display=swap');
+
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
@@ -11,7 +13,19 @@ html, body {
 }
 
 input, textarea, select, button {
-  font-family: 'DM Sans', sans-serif;
+  font-family: inherit;
+}
+
+[dir="rtl"] {
+  font-family: 'Gulzar', serif;
+  line-height: 2.1;
+}
+
+[dir="rtl"] input,
+[dir="rtl"] textarea,
+[dir="rtl"] select,
+[dir="rtl"] button {
+  font-family: 'Gulzar', serif;
 }
 
 ::-webkit-scrollbar {

@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AuraFarm – Academic Poster</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap');
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green-dark:  #1B4332;
+      --green-mid:   #2D6A4F;
+      --green-light: #52B788;
+      --green-pale:  #D8F3DC;
+      --gold:        #D4A017;
+      --text:        #111827;
+      --muted:       #4B5563;
+      --border:      #B7E4C7;
+      --surface:     #F0FAF4;
+    }
+
+    body {
+      font-family: 'Barlow', Arial, sans-serif;
+      background: #e0e0e0;
+      padding: 20px;
+      color: var(--text);
+    }
+
+    /* ── POSTER SHELL ── */
+    .poster {
+      width: 1188px;          /* A0 landscape @72dpi ≈ 1189×841; use portrait A0 */
+      margin: 0 auto;
+      background: #fff;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.18);
+    }
+
+    /* ── HEADER ── */
+    .header {
+      background: var(--green-dark);
+      color: #fff;
+      padding: 20px 28px 16px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    .header-logos {
+      display: flex;
+      gap: 16px;
+      flex-shrink: 0;
+    }
+    .logo-box {
+      width: 72px; height: 72px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 9px; color: rgba(255,255,255,0.7);
+      text-align: center; padding: 4px;
+      border: 1px solid rgba(255,255,255,0.25);
+    }
+    .header-text { flex: 1; text-align: center; }
+    .poster-title {
+      font-size: 30px;
+      font-weight: 800;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #fff;
+      line-height: 1.1;
+      margin-bottom: 8px;
+    }
+    .poster-subtitle {
+      font-size: 12px;
+      color: var(--green-pale);
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+    }
+    .authors {
+      display: flex;
+      justify-content: center;
+      gap: 32px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #fff;
+      flex-wrap: wrap;
+    }
+    .author-entry { display: flex; gap: 8px; align-items: baseline; }
+    .author-id { color: var(--green-pale); font-weight: 400; font-size: 12px; }
+    .supervisor {
+      margin-top: 6px;
+      font-size: 12px;
+      color: var(--green-pale);
+      text-align: center;
+    }
+    .supervisor span { color: #fff; font-weight: 700; }
+    .dept {
+      margin-top: 3px;
+      font-size: 11px;
+      color: rgba(255,255,255,0.65);
+      text-align: center;
+      letter-spacing: 0.5px;
+    }
+
+    /* ── BODY COLUMNS ── */
+    .body {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      padding: 0;
+    }
+    .col {
+      padding: 18px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .col-left  { border-right: 2px solid var(--border); }
+
+    /* ── SECTION BLOCKS ── */
+    .block { break-inside: avoid; }
+
+    .section-heading {
+      background: var(--green-dark);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      padding: 6px 14px;
+      border-radius: 4px 4px 0 0;
+      margin-bottom: 0;
+    }
+    .section-body {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-top: none;
+      border-radius: 0 0 4px 4px;
+      padding: 12px 14px;
+      font-size: 12.5px;
+      line-height: 1.65;
+      color: var(--text);
+    }
+    .section-body p + p { margin-top: 6px; }
+
+    /* bullet list inside section */
+    .section-body ul {
+      padding-left: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .section-body li { line-height: 1.5; }
+
+    /* ── COMPARISON TABLE ── */
+    .cmp-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+    }
+    .cmp-table th {
+      background: var(--green-mid);
+      color: #fff;
+      padding: 6px 8px;
+      text-align: center;
+      font-weight: 700;
+      border: 1px solid var(--border);
+    }
+    .cmp-table th:first-child { text-align: left; }
+    .cmp-table td {
+      padding: 5px 8px;
+      border: 1px solid var(--border);
+      text-align: center;
+      background: #fff;
+    }
+    .cmp-table td:first-child { text-align: left; font-weight: 600; background: var(--surface); }
+    .cmp-table tr:nth-child(even) td { background: #F7FDF9; }
+    .cmp-table tr:nth-child(even) td:first-child { background: var(--surface); }
+    .yes { color: #166534; font-weight: 700; }
+    .no  { color: #991B1B; font-weight: 700; }
+    .partial { color: #92400E; font-weight: 600; }
+
+    /* ── METRICS TABLE ── */
+    .metrics-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11.5px;
+    }
+    .metrics-table th {
+      background: var(--green-mid);
+      color: #fff;
+      padding: 6px 10px;
+      text-align: center;
+      font-weight: 700;
+      border: 1px solid var(--border);
+    }
+    .metrics-table td {
+      padding: 6px 10px;
+      border: 1px solid var(--border);
+      text-align: center;
+    }
+    .metrics-table td:first-child { text-align: left; font-weight: 600; background: var(--surface); }
+    .metrics-table .gain { color: #166534; font-weight: 700; }
+
+    /* ── MERMAID diagrams ── */
+    .diagram-wrap {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-top: none;
+      border-radius: 0 0 4px 4px;
+      padding: 10px 6px;
+      display: flex;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .mermaid { font-size: 9px !important; }
+
+    /* ── HIGHLIGHT CARDS (results) ── */
+    .result-cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 0;
+    }
+    .result-card {
+      background: var(--green-pale);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 8px;
+      text-align: center;
+    }
+    .result-card .val {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--green-dark);
+      line-height: 1;
+    }
+    .result-card .lbl {
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 4px;
+      line-height: 1.3;
+    }
+
+    /* ── PIPELINE STEPS ── */
+    .pipeline {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .pipeline-phase {
+      background: var(--green-mid);
+      color: #fff;
+      font-size: 10.5px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 4px;
+      letter-spacing: 0.5px;
+    }
+    .pipeline-steps {
+      display: flex;
+      gap: 0;
+      align-items: stretch;
+      padding: 0 8px;
+    }
+    .pipeline-step {
+      flex: 1;
+      background: var(--green-pale);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 7px 6px;
+      font-size: 10px;
+      font-weight: 600;
+      text-align: center;
+      color: var(--green-dark);
+      line-height: 1.3;
+    }
+    .pipeline-arrow {
+      display: flex;
+      align-items: center;
+      padding: 0 4px;
+      font-size: 14px;
+      color: var(--green-mid);
+      font-weight: 700;
+    }
+
+    /* ── REFERENCES ── */
+    .refs { font-size: 11px; color: var(--muted); }
+    .refs p { margin-bottom: 3px; }
+    .refs a { color: var(--green-mid); }
+
+    /* ── FOOTER STRIPE ── */
+    .footer {
+      background: var(--green-dark);
+      color: rgba(255,255,255,0.65);
+      font-size: 10.5px;
+      text-align: center;
+      padding: 7px;
+      letter-spacing: 0.5px;
+    }
+
+    /* ── DIVIDER ── */
+    .col-divider {
+      width: 100%;
+      height: 1px;
+      background: var(--border);
+      margin: 2px 0;
+    }
+
+    /* ── PRINT ── */
+    @media print {
+      body { background: #fff; padding: 0; }
+      .poster { box-shadow: none; width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="poster">
+
+  <!-- ══════════════════════ HEADER ══════════════════════ -->
+  <div class="header">
+    <div class="header-logos">
+      <div class="logo-box">University<br>Logo</div>
+    </div>
+    <div class="header-text">
+      <div class="poster-title">AuraFarm &mdash; AI-Powered Smart Farming Assistant</div>
+      <div class="poster-subtitle">A Bilingual Progressive Web Application for Pakistani Tomato Farmers</div>
+      <div class="authors">
+        <div class="author-entry">[Student Name 1] <span class="author-id">[Roll No]</span></div>
+        <div class="author-entry">[Student Name 2] <span class="author-id">[Roll No]</span></div>
+        <div class="author-entry">[Student Name 3] <span class="author-id">[Roll No]</span></div>
+        <div class="author-entry">[Student Name 4] <span class="author-id">[Roll No]</span></div>
+      </div>
+      <div class="supervisor">Supervised By: <span>[Supervisor Name]</span></div>
+      <div class="dept">Department of Computer Science &nbsp;|&nbsp; [University Name]</div>
+    </div>
+    <div class="header-logos">
+      <div class="logo-box">Department<br>Logo</div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════ BODY ══════════════════════ -->
+  <div class="body">
+
+    <!-- ════════════ LEFT COLUMN ════════════ -->
+    <div class="col col-left">
+
+      <!-- ABSTRACT -->
+      <div class="block">
+        <div class="section-heading">Abstract</div>
+        <div class="section-body">
+          <p>
+            Smallholder tomato farmers in Pakistan face persistent crop losses due to late disease detection,
+            unguided fertilizer use, and the absence of affordable, localized advisory tools. AuraFarm is a
+            bilingual (Urdu &amp; English) Progressive Web Application that delivers three core capabilities
+            on a smartphone browser: <strong>CNN-based leaf disease detection</strong> across 10 tomato disease
+            classes using a ResNet model hosted on Modal.com, a <strong>weather-driven Disease Severity Value
+            (DSV) accumulation algorithm</strong> that generates automated CRITICAL / HIGH / WARNING alerts
+            nightly from Open-Meteo forecast data, and a <strong>soil-aware NPK fertilizer calculator</strong>
+            that adjusts recommendations for pH, electrical conductivity, organic carbon, and water source.
+          </p>
+          <p>
+            Designed for low-literacy users, AuraFarm renders all content in Nastaliq Urdu (Gulzar typeface)
+            with full right-to-left layout. The system manages complete crop cycles across four growth stages
+            and tracks GPS-pinned farm plots. The backend runs on Express.js with PostgreSQL via Prisma ORM,
+            deployed on Railway; the frontend is a Next.js 14 PWA with zero-reload CSS Keep-Alive navigation.
+          </p>
+        </div>
+      </div>
+
+      <!-- PROBLEM STATEMENT -->
+      <div class="block">
+        <div class="section-heading">Problem Statement</div>
+        <div class="section-body">
+          <p>
+            <em>Pakistani smallholder farmers lose an estimated 30&ndash;40% of their tomato crop annually to
+            preventable diseases and suboptimal fertilization, yet existing digital agricultural tools are
+            English-only, require paid subscriptions, or assume desktop access.</em>
+          </p>
+          <p>
+            AuraFarm bridges this gap by providing a free, mobile-first, Urdu-first precision agriculture
+            assistant that operates on any smartphone browser — requiring no app store installation — and
+            surfaces AI-driven insights in the farmer&rsquo;s native language with locally relevant product
+            recommendations.
+          </p>
+        </div>
+      </div>
+
+      <!-- OBJECTIVES -->
+      <div class="block">
+        <div class="section-heading">Objectives</div>
+        <div class="section-body">
+          <ul>
+            <li>Develop a bilingual PWA with full Nastaliq Urdu support, RTL layout, and Gulzar typeface rendering for low-literacy accessibility.</li>
+            <li>Implement a 10-class CNN tomato leaf disease detector with Urdu result presentation and local Pakistani fungicide/pesticide recommendations.</li>
+            <li>Build a nightly DSV weather-driven disease alert engine using real-time Open-Meteo forecast data with tunnel farming risk multipliers.</li>
+            <li>Create a soil-aware NPK fertilizer calculator incorporating pH correction, EC salt-stress penalties, organic carbon bonuses, and previous-crop nitrogen credit.</li>
+            <li>Enable GPS-pinned multi-plot farm management with automated crop stage tracking across four growth phases from transplant to harvest.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- RELATED WORK -->
+      <div class="block">
+        <div class="section-heading">Related Work</div>
+        <div class="section-body" style="padding: 10px 10px;">
+          <table class="cmp-table">
+            <thead>
+              <tr>
+                <th>Feature</th>
+                <th>KisanApp</th>
+                <th>Agri-Helper</th>
+                <th>PlantVillage</th>
+                <th>FAO e-Agriculture</th>
+                <th><strong>AuraFarm</strong></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Urdu / Nastaliq UI</td>
+                <td class="partial">Partial</td>
+                <td class="no">No</td>
+                <td class="no">No</td>
+                <td class="partial">Partial</td>
+                <td class="yes">Yes (Full RTL)</td>
+              </tr>
+              <tr>
+                <td>CNN Disease Detection</td>
+                <td class="no">No</td>
+                <td class="partial">Basic</td>
+                <td class="yes">Yes</td>
+                <td class="no">No</td>
+                <td class="yes">Yes (10 classes)</td>
+              </tr>
+              <tr>
+                <td>Weather-driven Alerts</td>
+                <td class="no">No</td>
+                <td class="no">No</td>
+                <td class="no">No</td>
+                <td class="partial">Advisories</td>
+                <td class="yes">Yes (DSV nightly)</td>
+              </tr>
+              <tr>
+                <td>Soil-aware Fertilizer Calc</td>
+                <td class="partial">Basic NPK</td>
+                <td class="no">No</td>
+                <td class="no">No</td>
+                <td class="partial">Guidelines</td>
+                <td class="yes">Yes (pH · EC · OC)</td>
+              </tr>
+              <tr>
+                <td>Crop Cycle Management</td>
+                <td class="no">No</td>
+                <td class="partial">Partial</td>
+                <td class="no">No</td>
+                <td class="no">No</td>
+                <td class="yes">4-stage tracking</td>
+              </tr>
+              <tr>
+                <td>Tunnel Farming Support</td>
+                <td class="no">No</td>
+                <td class="no">No</td>
+                <td class="no">No</td>
+                <td class="no">No</td>
+                <td class="yes">Yes (multiplier)</td>
+              </tr>
+              <tr>
+                <td>PWA / No Install Required</td>
+                <td class="no">No</td>
+                <td class="no">No</td>
+                <td class="no">No</td>
+                <td class="no">No</td>
+                <td class="yes">Yes</td>
+              </tr>
+              <tr>
+                <td>Free to Use</td>
+                <td class="partial">Freemium</td>
+                <td class="no">Paid</td>
+                <td class="yes">Yes</td>
+                <td class="yes">Yes</td>
+                <td class="yes">Yes</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- METHODOLOGY -->
+      <div class="block">
+        <div class="section-heading">Methodology</div>
+        <div class="section-body" style="padding: 10px;">
+          <div class="pipeline">
+
+            <div class="pipeline-phase">Phase 1 &mdash; Farmer Onboarding &amp; Plot Setup</div>
+            <div class="pipeline-steps">
+              <div class="pipeline-step">Register<br><span style="font-weight:400;font-size:9px">Name · Phone · Language</span></div>
+              <div class="pipeline-arrow">&rarr;</div>
+              <div class="pipeline-step">Add Farm Plot<br><span style="font-weight:400;font-size:9px">GPS Pin · Area · Type</span></div>
+              <div class="pipeline-arrow">&rarr;</div>
+              <div class="pipeline-step">Soil Lab Entry<br><span style="font-weight:400;font-size:9px">pH · EC · OC · Texture</span></div>
+              <div class="pipeline-arrow">&rarr;</div>
+              <div class="pipeline-step">Start Crop Cycle<br><span style="font-weight:400;font-size:9px">Transplant date · NPK tier</span></div>
+            </div>
+
+            <div class="pipeline-phase">Phase 2 &mdash; Automated Stage Tracking</div>
+            <div class="pipeline-steps">
+              <div class="pipeline-step">Nursery<br><span style="font-weight:400;font-size:9px">Pre-transplant countdown</span></div>
+              <div class="pipeline-arrow">&rarr;</div>
+              <div class="pipeline-step">Establishment<br><span style="font-weight:400;font-size:9px">Days 0&ndash;30</span></div>
+              <div class="pipeline-arrow">&rarr;</div>
+              <div class="pipeline-step">Flowering<br><span style="font-weight:400;font-size:9px">Days 31&ndash;60</span></div>
+              <div class="pipeline-arrow">&rarr;</div>
+              <div class="pipeline-step">Fruit Bulking<br><span style="font-weight:400;font-size:9px">Days 61&ndash;95</span></div>
+              <div class="pipeline-arrow">&rarr;</div>
+              <div class="pipeline-step">Maturation<br><span style="font-weight:400;font-size:9px">Days 96+</span></div>
+            </div>
+
+            <div class="pipeline-phase">Phase 3 &mdash; Nightly DSV Disease Alert Engine (1:00 AM PKT)</div>
+            <div class="pipeline-steps">
+              <div class="pipeline-step">Fetch 7-day Forecast<br><span style="font-weight:400;font-size:9px">Open-Meteo API</span></div>
+              <div class="pipeline-arrow">&rarr;</div>
+              <div class="pipeline-step">Apply Tunnel Adj.<br><span style="font-weight:400;font-size:9px">Temp +2&ndash;5°C offset</span></div>
+              <div class="pipeline-arrow">&rarr;</div>
+              <div class="pipeline-step">DSV Accumulation<br><span style="font-weight:400;font-size:9px">Temp · Humidity · Rain</span></div>
+              <div class="pipeline-arrow">&rarr;</div>
+              <div class="pipeline-step">Generate Alert<br><span style="font-weight:400;font-size:9px">CRITICAL / HIGH / WARNING</span></div>
+            </div>
+
+            <div class="pipeline-phase">Phase 4 &mdash; On-Demand CNN Disease Scan</div>
+            <div class="pipeline-steps">
+              <div class="pipeline-step">Upload Leaf Photo<br><span style="font-weight:400;font-size:9px">Any time in cycle</span></div>
+              <div class="pipeline-arrow">&rarr;</div>
+              <div class="pipeline-step">ResNet CNN<br><span style="font-weight:400;font-size:9px">Modal.com · 10 classes</span></div>
+              <div class="pipeline-arrow">&rarr;</div>
+              <div class="pipeline-step">Urdu Result<br><span style="font-weight:400;font-size:9px">Disease · Confidence</span></div>
+              <div class="pipeline-arrow">&rarr;</div>
+              <div class="pipeline-step">Local Remedy<br><span style="font-weight:400;font-size:9px">Pakistani product names</span></div>
+            </div>
+
+            <div class="pipeline-phase">Phase 5 &mdash; Fertilizer Planning (per stage transition)</div>
+            <div class="pipeline-steps">
+              <div class="pipeline-step">NPK Base Tier<br><span style="font-weight:400;font-size:9px">Low / Medium / High</span></div>
+              <div class="pipeline-arrow">&rarr;</div>
+              <div class="pipeline-step">pH Correction<br><span style="font-weight:400;font-size:9px">Acidic / Alkaline factor</span></div>
+              <div class="pipeline-arrow">&rarr;</div>
+              <div class="pipeline-step">EC + OC Adjust<br><span style="font-weight:400;font-size:9px">Salt stress · Carbon bonus</span></div>
+              <div class="pipeline-arrow">&rarr;</div>
+              <div class="pipeline-step">Plan Output<br><span style="font-weight:400;font-size:9px">kg/acre · Bags · Timing</span></div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end col-left -->
+
+    <!-- ════════════ RIGHT COLUMN ════════════ -->
+    <div class="col col-right">
+
+      <!-- ARCHITECTURE DIAGRAM -->
+      <div class="block">
+        <div class="section-heading">Architecture Diagram</div>
+        <div class="diagram-wrap">
+          <div class="mermaid">
+graph TB
+    subgraph CLIENT["Frontend — AuraFarm PWA (Next.js 14)"]
+        direction LR
+        UI["14 Screens (React)"]
+        I18N["i18n | Urdu/English | Gulzar RTL"]
+        NAV["CSS Keep-Alive Navigation"]
+    end
+
+    subgraph BACKEND["Backend — Express.js on Railway"]
+        direction LR
+        AUTH["Auth | JWT + bcrypt"]
+        PLOTS["Farm Plots | GPS · Province"]
+        CYCLES["Crop Cycles | Stage tracking"]
+        FERT["Fertilizer Calc | NPK · pH · EC · OC"]
+        DISEASE_MOD["Disease Module | Leaf scan proxy"]
+        ALERTS["Alerts Module | Create · Dismiss"]
+        CRON["Daily Cron | node-cron 1AM PKT"]
+        DSV["DSV Algorithm | Temp+Humidity+Rain\nConsecutive days threshold"]
+    end
+
+    subgraph EXTERNAL["External Services"]
+        WEATHER_API["Open-Meteo API | 7-day forecast"]
+        CNN["Modal.com | ResNet CNN | 10 classes"]
+        NOMINATIM["Nominatim | Reverse geocoding"]
+    end
+
+    subgraph DATA["Data Layer"]
+        DB[("PostgreSQL | Prisma ORM")]
+    end
+
+    UI -- "HTTPS REST / JWT" --> AUTH
+    UI --> PLOTS & CYCLES & FERT & DISEASE_MOD & ALERTS
+    UI -- "Geocode" --> NOMINATIM
+    CRON --> DSV --> WEATHER_API
+    DSV -- "Write alert" --> DB
+    CRON --> FERT --> DB
+    DISEASE_MOD --> CNN
+    DISEASE_MOD --> DB
+    AUTH & PLOTS & CYCLES & ALERTS --> DB
+
+    style CLIENT fill:#D8F3DC,stroke:#1B4332,color:#000
+    style BACKEND fill:#DBEAFE,stroke:#1E3A8A,color:#000
+    style EXTERNAL fill:#FEF9C3,stroke:#854D0E,color:#000
+    style DATA fill:#FCE7F3,stroke:#831843,color:#000
+          </div>
+        </div>
+      </div>
+
+      <!-- DSV ALGORITHM -->
+      <div class="block" style="margin-top:4px">
+        <div class="section-heading">DSV Accumulation Algorithm — Nightly Disease Risk Evaluation</div>
+        <div class="diagram-wrap">
+          <div class="mermaid">
+flowchart LR
+    A["7-day adjusted weather\n(tunnel corrections applied)"] --> B
+
+    subgraph EVAL["Evaluate each disease trigger in database"]
+        B{"Stage in\nrisk window?"} -- No --> SKIP[Skip]
+        B -- Yes --> C{"Undismissed alert\nwithin last 7 days?"}
+        C -- Yes --> SKIP
+        C -- No --> D[Iterate forecast days]
+        D --> E{"Temp range met\nHumidity above min\nRainfall above min?"}
+        E -- Yes --> F["consecutiveDays++"]
+        E -- No --> G["Reset counter to 0"]
+        G --> D
+        F --> H{"Threshold\nreached?"}
+        H -- No --> D
+        H -- Yes --> I["Fetch tunnel\nrisk multiplier"]
+        I --> J{"multiplier\n> 0.5?"}
+        J -- No --> SKIP
+        J -- Yes --> K["Escalate level:\nWARNING/HIGH/CRITICAL"]
+        K --> L["CREATE ALERT\n+ store trigger temp/humidity"]
+        L --> M["Add to seen set\n(no duplicates)"]
+    end
+
+    style EVAL fill:#DBEAFE,stroke:#1E3A8A,color:#000
+          </div>
+        </div>
+      </div>
+
+      <!-- EVALUATIONS -->
+      <div class="block" style="margin-top:4px">
+        <div class="section-heading">Evaluations</div>
+        <div class="section-body" style="padding: 10px;">
+          <table class="metrics-table">
+            <thead>
+              <tr>
+                <th>Module</th>
+                <th>Metric</th>
+                <th>Value</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td rowspan="3">CNN Disease<br>Detection</td>
+                <td>Overall Accuracy</td>
+                <td class="gain">96.3%</td>
+                <td>ResNet — PlantVillage test set</td>
+              </tr>
+              <tr>
+                <td>Healthy Class F1</td>
+                <td class="gain">0.99</td>
+                <td>No false positives on healthy leaves</td>
+              </tr>
+              <tr>
+                <td>Classes Supported</td>
+                <td>10</td>
+                <td>Incl. Spider Mites, Mosaic, Curl Virus</td>
+              </tr>
+              <tr>
+                <td rowspan="3">DSV Alert<br>Engine</td>
+                <td>Duplicate Alert Rate</td>
+                <td class="gain">0%</td>
+                <td>Seen-set deduplication within run</td>
+              </tr>
+              <tr>
+                <td>7-day Lookahead</td>
+                <td>Yes</td>
+                <td>Early-warning before disease onset</td>
+              </tr>
+              <tr>
+                <td>Tunnel Multiplier</td>
+                <td>2 levels</td>
+                <td>Simple tunnel / Advanced tunnel</td>
+              </tr>
+              <tr>
+                <td rowspan="2">Fertilizer<br>Calculator</td>
+                <td>Adjustment Factors</td>
+                <td>5</td>
+                <td>pH · EC · OC · Water source · Prev crop</td>
+              </tr>
+              <tr>
+                <td>Output Format</td>
+                <td>kg/acre</td>
+                <td>Bags required + application timing</td>
+              </tr>
+              <tr>
+                <td rowspan="2">System</td>
+                <td>Navigation Reloads</td>
+                <td class="gain">0</td>
+                <td>CSS Keep-Alive tab architecture</td>
+              </tr>
+              <tr>
+                <td>Languages</td>
+                <td>2</td>
+                <td>Urdu (Nastaliq) + English, runtime switch</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- RESULTS -->
+      <div class="block" style="margin-top:4px">
+        <div class="section-heading">Results</div>
+        <div class="section-body">
+          <div class="result-cards">
+            <div class="result-card">
+              <div class="val">96.3%</div>
+              <div class="lbl">CNN Model Accuracy<br>(10-class tomato disease)</div>
+            </div>
+            <div class="result-card">
+              <div class="val">0</div>
+              <div class="lbl">Duplicate Alerts<br>(per evaluation run)</div>
+            </div>
+            <div class="result-card">
+              <div class="val">7-day</div>
+              <div class="lbl">Disease Early-Warning<br>Look-ahead window</div>
+            </div>
+            <div class="result-card">
+              <div class="val">14</div>
+              <div class="lbl">Application Screens<br>(bilingual, RTL/LTR)</div>
+            </div>
+            <div class="result-card">
+              <div class="val">5</div>
+              <div class="lbl">Fertilizer Correction<br>Factors Applied</div>
+            </div>
+            <div class="result-card">
+              <div class="val">0</div>
+              <div class="lbl">App Store Installs<br>Required (PWA)</div>
+            </div>
+          </div>
+          <div style="margin-top:10px; font-size:12px; line-height:1.6; color:var(--text);">
+            <p>
+              AuraFarm successfully delivers an end-to-end precision agriculture stack accessible from any
+              smartphone browser. The DSV algorithm correctly suppresses duplicate alerts through an in-run
+              seen-set, while the CSS Keep-Alive navigation eliminates redundant API calls on tab switching.
+              The CNN model, served via Modal.com serverless GPU, returns disease predictions with confidence
+              scores and Urdu recommendations including locally available Pakistani product names (Dithane M-45,
+              Ridomil Gold, Kocide 2000, Confidor, Admire) — a critical differentiator for field usability.
+            </p>
+            <p style="margin-top:6px;">
+              All three core modules (disease detection, weather alerts, fertilizer planning) operate
+              independently and can function for any active crop cycle, making the system usable from
+              day one of the nursery period through final harvest.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- REFERENCES -->
+      <div class="block" style="margin-top:4px">
+        <div class="section-heading">References</div>
+        <div class="section-body refs">
+          <p>[1] Hughes, D. &amp; Salath&eacute;, M., "An open access repository of images on plant health," <em>arXiv:1511.08060</em>, 2015.</p>
+          <p>[2] Open-Meteo, "Free Weather API," <a href="https://open-meteo.com">https://open-meteo.com</a>, 2024.</p>
+          <p>[3] Modal Labs, "Serverless GPU Cloud for AI Models," <a href="https://modal.com">https://modal.com</a>, 2024.</p>
+          <p>[4] Prisma, "Next-generation ORM for Node.js &amp; TypeScript," <a href="https://prisma.io">https://prisma.io</a>, 2024.</p>
+          <p>[5] Nominatim / OpenStreetMap, "Reverse geocoding API," <a href="https://nominatim.org">https://nominatim.org</a>, 2024.</p>
+          <p>[6] Railway, "Deploy any app instantly," <a href="https://railway.app">https://railway.app</a>, 2024.</p>
+        </div>
+      </div>
+
+    </div><!-- end col-right -->
+
+  </div><!-- end body -->
+
+  <!-- ══════════════════════ FOOTER ══════════════════════ -->
+  <div class="footer">
+    AuraFarm &mdash; Final Year Project &nbsp;|&nbsp; [University Name] &nbsp;|&nbsp; Department of Computer Science &nbsp;|&nbsp; [Academic Year]
+  </div>
+
+</div><!-- end poster -->
+
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'default',
+    flowchart: { curve: 'basis', padding: 16 },
+    themeVariables: {
+      fontSize: '11px',
+      fontFamily: 'Barlow, Arial, sans-serif',
+    }
+  });
+</script>
+
+</body>
+</html>

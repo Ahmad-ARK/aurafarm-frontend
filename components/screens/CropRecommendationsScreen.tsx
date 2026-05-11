@@ -3,11 +3,7 @@
 import { useState } from 'react';
 import { T } from '@/lib/tokens';
 import Icon from '@/components/ui/Icon';
-
-const MONTH_NAMES = [
-    '', 'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December',
-];
+import { useTranslation } from '@/lib/useTranslation';
 
 const PROVINCES = [
     { id: 'PUNJAB', name: 'Punjab' },
@@ -87,6 +83,7 @@ const CROP_DATA = [
 ];
 
 function CropCard({ crop, muted = false }: { crop: any; muted?: boolean }) {
+    const { t } = useTranslation();
     const catStyle = CATEGORY_COLORS[crop.category] || { bg: T.surface, color: T.muted };
 
     return (
@@ -117,11 +114,11 @@ function CropCard({ crop, muted = false }: { crop: any; muted?: boolean }) {
 
             <div style={{ display: 'flex', gap: 20, marginTop: 12 }}>
                 <div>
-                    <div style={{ fontSize: 11, color: T.muted }}>Duration</div>
+                    <div style={{ fontSize: 11, color: T.muted }}>{t('recs_duration')}</div>
                     <div style={{ fontSize: 13, fontWeight: 600, color: T.text }}>{crop.duration}</div>
                 </div>
                 <div>
-                    <div style={{ fontSize: 11, color: T.muted }}>Yield / Acre</div>
+                    <div style={{ fontSize: 11, color: T.muted }}>{t('recs_yield')}</div>
                     <div style={{ fontSize: 13, fontWeight: 600, color: T.text }}>{crop.yieldPerAcre}</div>
                 </div>
             </div>
@@ -137,6 +134,7 @@ function CropCard({ crop, muted = false }: { crop: any; muted?: boolean }) {
 }
 
 export default function CropRecommendationsScreen({ navigate }: { navigate: (s: string) => void }) {
+    const { t } = useTranslation();
     const currentMonth = new Date().getMonth() + 1;
     const nextMonth = currentMonth === 12 ? 1 : currentMonth + 1;
     const [province, setProvince] = useState(
@@ -152,6 +150,10 @@ export default function CropRecommendationsScreen({ navigate }: { navigate: (s: 
         return !months.includes(currentMonth) && months.includes(nextMonth);
     });
 
+    const currentMonthName = t(`month_${currentMonth}`);
+    const nextMonthName = t(`month_${nextMonth}`);
+    const provinceName = PROVINCES.find(p => p.id === province)?.name || province;
+
     return (
         <div style={{ flex: 1, overflowY: 'auto' }}>
 
@@ -161,9 +163,9 @@ export default function CropRecommendationsScreen({ navigate }: { navigate: (s: 
                 padding: '20px 20px 28px',
                 color: 'white',
             }}>
-                <div style={{ fontSize: 20, fontWeight: 700 }}>Crop Recommendations</div>
+                <div style={{ fontSize: 20, fontWeight: 700 }}>{t('recs_title')}</div>
                 <div style={{ fontSize: 13, opacity: 0.8, marginTop: 4 }}>
-                    Best crops to plant in {MONTH_NAMES[currentMonth]}
+                    {t('recs_best', { month: currentMonthName })}
                 </div>
             </div>
 
@@ -171,7 +173,7 @@ export default function CropRecommendationsScreen({ navigate }: { navigate: (s: 
 
                 {/* Province selector */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                    <label style={{ fontSize: 13, fontWeight: 500, color: T.muted }}>Your Province</label>
+                    <label style={{ fontSize: 13, fontWeight: 500, color: T.muted }}>{t('recs_your_province')}</label>
                     <select
                         value={province}
                         onChange={e => setProvince(e.target.value)}
@@ -189,7 +191,7 @@ export default function CropRecommendationsScreen({ navigate }: { navigate: (s: 
 
                 {/* Plant now */}
                 <div style={{ fontSize: 14, fontWeight: 600, color: T.text }}>
-                    Plant Now — {MONTH_NAMES[currentMonth]}
+                    {t('recs_plant_now', { month: currentMonthName })}
                 </div>
 
                 {recommended.length === 0 ? (
@@ -198,7 +200,7 @@ export default function CropRecommendationsScreen({ navigate }: { navigate: (s: 
                         borderRadius: 14, padding: '24px 16px',
                         textAlign: 'center', color: T.muted, fontSize: 13,
                     }}>
-                        No major crops recommended this month for {PROVINCES.find(p => p.id === province)?.name}.
+                        {t('recs_none', { province: provinceName })}
                     </div>
                 ) : (
                     recommended.map(crop => <CropCard key={crop.id} crop={crop} />)
@@ -208,7 +210,7 @@ export default function CropRecommendationsScreen({ navigate }: { navigate: (s: 
                 {upcoming.length > 0 && (
                     <>
                         <div style={{ fontSize: 14, fontWeight: 600, color: T.text, marginTop: 4 }}>
-                            Coming Next Month — {MONTH_NAMES[nextMonth]}
+                            {t('recs_coming', { month: nextMonthName })}
                         </div>
                         {upcoming.map(crop => <CropCard key={crop.id} crop={crop} muted />)}
                     </>

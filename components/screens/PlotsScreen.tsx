@@ -3,14 +3,17 @@
 import { useState, useEffect } from 'react';
 import { T } from '@/lib/tokens';
 import Icon from '@/components/ui/Icon';
-
-const FARMING_TYPE_LABEL: Record<string, string> = {
-    OPEN_FIELD: 'Open Field',
-    TUNNEL_SIMPLE: 'Simple Tunnel',
-    TUNNEL_ADVANCED: 'Advanced Tunnel',
-};
+import { useTranslation } from "@/lib/useTranslation";
 
 export default function PlotsScreen({ navigate }: { navigate: (s: string, data?: { cycleId?: string; plotId?: string; plotName?: string }) => void }) {
+    const { t } = useTranslation();
+
+    const FARMING_TYPE_LABEL: Record<string, string> = {
+        OPEN_FIELD: t('type_open'),
+        TUNNEL_SIMPLE: t('type_simple'),
+        TUNNEL_ADVANCED: t('type_advanced'),
+    };
+
     const [plots, setPlots] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -34,7 +37,7 @@ export default function PlotsScreen({ navigate }: { navigate: (s: string, data?:
 
     async function handleDelete(plotId: string, plotName: string) {
         const confirmed = window.confirm(
-            `Delete "${plotName}"?\n\nThis will also delete all crop cycles and data for this plot.`
+            t('plots_delete_confirm', { name: plotName })
         );
         if (!confirmed) return;
 
@@ -50,7 +53,7 @@ export default function PlotsScreen({ navigate }: { navigate: (s: string, data?:
         if (res.ok) {
             setPlots(prev => prev.filter(p => p.id !== plotId));
         } else {
-            alert('Failed to delete plot. Please try again.');
+            alert(t('plots_delete_failed'));
         }
     }
 
@@ -68,7 +71,7 @@ export default function PlotsScreen({ navigate }: { navigate: (s: string, data?:
                     alignItems: 'center',
                 }}>
                     <div>
-                        <div style={{ fontSize: 13, color: T.muted }}>Total Plots</div>
+                        <div style={{ fontSize: 13, color: T.muted }}>{t('plots_total')}</div>
                         <div style={{ fontSize: 22, fontWeight: 700, color: T.green800, marginTop: 2 }}>
                             {plots.length}
                         </div>
@@ -90,14 +93,14 @@ export default function PlotsScreen({ navigate }: { navigate: (s: string, data?:
                         }}
                     >
                         <Icon name="plus" size={16} color="white" />
-                        Add Plot
+                        {t('plots_add')}
                     </button>
                 </div>
 
                 {/* Loading */}
                 {loading && (
                     <div style={{ textAlign: 'center', color: T.muted, padding: 32 }}>
-                        Loading plots...
+                        {t('plots_loading')}
                     </div>
                 )}
 
@@ -111,12 +114,12 @@ export default function PlotsScreen({ navigate }: { navigate: (s: string, data?:
                         textAlign: 'center',
                         color: T.muted,
                     }}>
-                        <div style={{ fontSize: 14, marginBottom: 8 }}>No plots yet</div>
+                        <div style={{ fontSize: 14, marginBottom: 8 }}>{t('plots_empty')}</div>
                         <span
                             onClick={() => navigate('add-plot')}
                             style={{ color: T.green800, fontWeight: 600, cursor: 'pointer', fontSize: 14 }}
                         >
-                            Add your first plot →
+                            {t('plots_add_first')}
                         </span>
                     </div>
                 )}
@@ -162,7 +165,7 @@ export default function PlotsScreen({ navigate }: { navigate: (s: string, data?:
                                             borderRadius: 20,
                                             letterSpacing: 0.3,
                                         }}>
-                                            ACTIVE
+                                            {t('plots_active')}
                                         </div>
                                     )}
                                 </div>
@@ -187,7 +190,7 @@ export default function PlotsScreen({ navigate }: { navigate: (s: string, data?:
                                         cursor: 'pointer',
                                     }}
                                 >
-                                    Delete
+                                    {t('plots_delete')}
                                 </button>
                                 <Icon name="chevronRight" size={18} color={T.muted} />
                             </div>
@@ -232,7 +235,7 @@ export default function PlotsScreen({ navigate }: { navigate: (s: string, data?:
                                 {plot.soilData?.length > 0 && (
                                     <Icon name="check" size={11} color={T.green800} />
                                 )}
-                                Soil Data
+                                {t('plots_soil')}
                             </button>
                             <button
                                 onClick={e => {
@@ -250,7 +253,7 @@ export default function PlotsScreen({ navigate }: { navigate: (s: string, data?:
                                     cursor: 'pointer',
                                 }}
                             >
-                                Start Cycle
+                                {t('plots_start')}
                             </button>
                         </div>
                     </div>

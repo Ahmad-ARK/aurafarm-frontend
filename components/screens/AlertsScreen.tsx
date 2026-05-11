@@ -3,13 +3,33 @@
 import { useState, useEffect } from 'react';
 import { T } from '@/lib/tokens';
 import Icon from '@/components/ui/Icon';
+import { useTranslation } from "@/lib/useTranslation";
 
 const API = 'https://aurafarm-production-1691.up.railway.app';
 
 const LEVEL_COLORS: Record<string, { bg: string; text: string; border: string }> = {
     CRITICAL: { bg: '#FFEBEE', text: '#C62828', border: '#EF9A9A' },
-    HIGH: { bg: '#FFF3E0', text: '#E65100', border: '#FFB74D' },
-    WARNING: { bg: '#FFFDE7', text: '#F57F17', border: '#FFF176' },
+    HIGH:     { bg: '#FFF3E0', text: '#E65100', border: '#FFB74D' },
+    WARNING:  { bg: '#FFFDE7', text: '#F57F17', border: '#FFF176' },
+};
+
+// Maps DB diseaseId (SNAKE_CASE) → Urdu display name
+const DISEASE_URDU: Record<string, string> = {
+    LATE_BLIGHT:          'پچھیتا جھلساؤ',
+    EARLY_BLIGHT:         'اگیتا جھلساؤ',
+    BACTERIAL_SPOT:       'بیکٹیریائی دھبے',
+    LEAF_MOLD:            'پتے کی پھپھوندی',
+    SEPTORIA_LEAF_SPOT:   'سیپٹوریا دھبے',
+    SPIDER_MITES:         'سُرخ مکڑی',
+    TARGET_SPOT:          'ہدف دھبہ',
+    MOSAIC_VIRUS:         'موزیک وائرس',
+    YELLOW_LEAF_CURL_VIRUS: 'پیلا پتہ موڑ وائرس',
+};
+
+// Maps DB pathogenType → translation key suffix
+const PATHOGEN_KEY: Record<string, string> = {
+    Fungal: 'fungal', Bacterial: 'bacterial',
+    Viral: 'viral', Pest: 'pest',
 };
 
 type Props = {
@@ -17,6 +37,7 @@ type Props = {
 };
 
 export default function AlertsScreen({ navigate }: Props) {
+    const { t } = useTranslation();
     const token = localStorage.getItem('token') || '';
     const farmerId = localStorage.getItem('farmerId') || '';
 
@@ -48,7 +69,7 @@ export default function AlertsScreen({ navigate }: Props) {
     if (loading) {
         return (
             <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: T.muted }}>
-                Loading alerts...
+                {t('alerts_loading')}
             </div>
         );
     }
@@ -59,7 +80,7 @@ export default function AlertsScreen({ navigate }: Props) {
 
                 {/* Header */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-                    <div style={{ fontSize: 20, fontWeight: 700, color: T.text }}>Disease Alerts</div>
+                    <div style={{ fontSize: 20, fontWeight: 700, color: T.text }}>{t('alerts_title')}</div>
                     {alerts.length > 0 && (
                         <div style={{
                             background: T.red100,
@@ -69,7 +90,7 @@ export default function AlertsScreen({ navigate }: Props) {
                             padding: '4px 10px',
                             borderRadius: 20,
                         }}>
-                            {alerts.length} active
+                            {t('alerts_active', { count: alerts.length })}
                         </div>
                     )}
                 </div>
@@ -89,10 +110,10 @@ export default function AlertsScreen({ navigate }: Props) {
                             </div>
                         </div>
                         <div style={{ fontSize: 15, fontWeight: 600, color: T.text, marginBottom: 6 }}>
-                            No active alerts
+                            {t('alerts_no_active')}
                         </div>
                         <div style={{ fontSize: 13, color: T.muted }}>
-                            Your crops look healthy. We'll notify you if any disease risk is detected.
+                            {t('alerts_healthy')}
                         </div>
                     </div>
                 )}
@@ -100,9 +121,13 @@ export default function AlertsScreen({ navigate }: Props) {
                 {/* Alert cards */}
                 {alerts.map((alert: any) => {
                     const colors = LEVEL_COLORS[alert.alertLevel] || LEVEL_COLORS.WARNING;
-                    const date = new Date(alert.createdAt).toLocaleDateString('en-PK', {
+                    const date = new Date(alert.createdAt).toLocaleDateString('en-GB', {
                         day: 'numeric', month: 'short',
                     });
+                    const urduName = DISEASE_URDU[alert.diseaseId] || alert.disease?.diseaseName || alert.diseaseId;
+                    const pathogenKey = PATHOGEN_KEY[alert.disease?.pathogenType];
+                    const pathogenLabel = pathogenKey ? t(`pathogen_${pathogenKey}` as any) : alert.disease?.pathogenType;
+                    const levelLabel = t(`alert_level_${alert.alertLevel}` as any) || alert.alertLevel;
 
                     return (
                         <div
@@ -125,29 +150,29 @@ export default function AlertsScreen({ navigate }: Props) {
                                     borderRadius: 6,
                                     letterSpacing: 0.5,
                                 }}>
-                                    {alert.alertLevel}
+                                    {levelLabel}
                                 </div>
                                 <div style={{ fontSize: 12, color: T.muted }}>{date}</div>
                             </div>
 
-                            {/* Disease name */}
+                            {/* Disease name in Urdu */}
                             <div style={{ fontSize: 15, fontWeight: 700, color: colors.text, marginBottom: 4 }}>
-                                {alert.disease?.diseaseName || alert.diseaseId}
+                                {urduName}
                             </div>
 
-                            {/* Scientific name */}
-                            {alert.disease?.pathogenType && (
-                                <div style={{ fontSize: 12, color: T.muted, fontStyle: 'italic', marginBottom: 8 }}>
-                                    {alert.disease.pathogenType}
+                            {/* Pathogen type translated */}
+                            {pathogenLabel && (
+                                <div style={{ fontSize: 12, color: T.muted, marginBottom: 8 }}>
+                                    {pathogenLabel}
                                 </div>
                             )}
 
-                            {/* Plot + cycle */}
-                            <div style={{ fontSize: 12, color: T.muted, marginBottom: 12 }}>
-                                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                                    <Icon name="mapPin" size={12} color={T.muted} />
-                                    {alert.cycle?.plot?.plotName || 'Plot'} · triggered at
-                                </span> {Number(alert.triggerTempC).toFixed(1)}°C, {Number(alert.triggerHumidityPct).toFixed(0)}% humidity
+                            {/* Plot + trigger conditions */}
+                            <div style={{ fontSize: 12, color: T.muted, marginBottom: 12, display: 'flex', alignItems: 'center', gap: 4 }}>
+                                <Icon name="mapPin" size={12} color={T.muted} />
+                                <span>
+                                    {alert.cycle?.plot?.plotName || '—'} · {Number(alert.triggerTempC).toFixed(1)}°C · {t('weather_humidity')} {Number(alert.triggerHumidityPct).toFixed(0)}%
+                                </span>
                             </div>
 
                             {/* Actions */}
@@ -166,7 +191,7 @@ export default function AlertsScreen({ navigate }: Props) {
                                         cursor: 'pointer',
                                     }}
                                 >
-                                    View Cycle
+                                    {t('alerts_view_cycle')}
                                 </button>
                                 <button
                                     onClick={() => handleDismiss(alert.id)}
@@ -182,7 +207,7 @@ export default function AlertsScreen({ navigate }: Props) {
                                         cursor: 'pointer',
                                     }}
                                 >
-                                    Dismiss
+                                    {t('alerts_dismiss')}
                                 </button>
                             </div>
                         </div>

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { T } from '@/lib/tokens';
 import Icon from '@/components/ui/Icon';
+import { useTranslation } from '@/lib/useTranslation';
 
 const API = 'https://aurafarm-production-1691.up.railway.app';
 
@@ -34,6 +35,7 @@ const inputStyle: React.CSSProperties = {
 };
 
 export default function ProfileScreen({ navigate }: Props) {
+    const { t } = useTranslation();
     const token = localStorage.getItem('token') || '';
     const farmerId = localStorage.getItem('farmerId') || '';
 
@@ -51,22 +53,28 @@ export default function ProfileScreen({ navigate }: Props) {
     const [language, setLanguage] = useState('ur');
 
     useEffect(() => {
+        const id = localStorage.getItem('farmerId') || '';
+        const tok = localStorage.getItem('token') || '';
+        if (!id || !tok) { setLoading(false); return; }
+
         async function loadFarmer() {
-            const res = await fetch(`${API}/api/farmers/${farmerId}`, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-            const data = await res.json();
-            if (res.ok) {
-                setFarmer(data);
-                setFullName(data.fullName || '');
-                setProvince(data.province || '');
-                setDistrict(data.district || '');
-                setExperience(data.farmingExperienceYears?.toString() || '');
-                setLanguage(data.preferredLanguage || 'ur');
-            }
-            setLoading(false);
+            try {
+                const res = await fetch(`${API}/api/farmers/${id}`, {
+                    headers: { Authorization: `Bearer ${tok}` },
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    setFarmer(data);
+                    setFullName(data.fullName || '');
+                    setProvince(data.province || '');
+                    setDistrict(data.district || '');
+                    setExperience(data.farmingExperienceYears?.toString() || '');
+                    setLanguage(data.preferredLanguage || 'ur');
+                }
+            } catch { /* network error — fall through to show empty state */ }
+            finally { setLoading(false); }
         }
-        if (farmerId) loadFarmer();
+        loadFarmer();
     }, []);
 
     function handleLogout() {
@@ -75,6 +83,7 @@ export default function ProfileScreen({ navigate }: Props) {
         localStorage.removeItem('farmerName');
         localStorage.removeItem('farmerProvince');
         localStorage.removeItem('farmerDistrict');
+        localStorage.removeItem('farmerLanguage');
         navigate('login');
     }
 
@@ -112,7 +121,7 @@ export default function ProfileScreen({ navigate }: Props) {
 
             if (!res.ok) {
                 const err = await res.json();
-                setSaveError(err.error || 'Failed to save changes');
+                setSaveError(err.error || t('profile_failed'));
                 return;
             }
 
@@ -122,9 +131,14 @@ export default function ProfileScreen({ navigate }: Props) {
             if (updated.fullName) localStorage.setItem('farmerName', updated.fullName);
             if (updated.province) localStorage.setItem('farmerProvince', updated.province);
             if (updated.district) localStorage.setItem('farmerDistrict', updated.district);
+            // Sync language and reload so new language applies immediately
+            if (updated.preferredLanguage) {
+                localStorage.setItem('farmerLanguage', updated.preferredLanguage);
+            }
             setEditing(false);
+            window.location.reload();
         } catch {
-            setSaveError('Network error. Please try again.');
+            setSaveError(t('common_failed'));
         } finally {
             setSaving(false);
         }
@@ -133,10 +147,13 @@ export default function ProfileScreen({ navigate }: Props) {
     if (loading) {
         return (
             <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: T.muted }}>
-                Loading...
+                {t('profile_loading')}
             </div>
         );
     }
+
+    const langLabel = (lang: string) =>
+        lang === 'ur' ? t('lang_ur') : lang === 'pa' ? t('lang_pa') : t('lang_en');
 
     return (
         <div style={{ flex: 1, overflowY: 'auto' }}>
@@ -185,7 +202,7 @@ export default function ProfileScreen({ navigate }: Props) {
                         padding: '12px 16px',
                         borderBottom: `1px solid ${T.border}`,
                     }}>
-                        <div style={{ fontSize: 13, fontWeight: 600, color: T.text }}>Profile Details</div>
+                        <div style={{ fontSize: 13, fontWeight: 600, color: T.text }}>{t('profile_details')}</div>
                         <button
                             onClick={handleEditToggle}
                             style={{
@@ -203,7 +220,7 @@ export default function ProfileScreen({ navigate }: Props) {
                             }}
                         >
                             <Icon name={editing ? 'close' : 'edit'} size={12} color={editing ? T.muted : T.green800} />
-                            {editing ? 'Cancel' : 'Edit'}
+                            {editing ? t('profile_cancel') : t('profile_edit')}
                         </button>
                     </div>
 
@@ -211,24 +228,24 @@ export default function ProfileScreen({ navigate }: Props) {
                         <div style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 12 }}>
                             {/* Full name */}
                             <div>
-                                <div style={{ fontSize: 12, color: T.muted, marginBottom: 5 }}>Full Name</div>
+                                <div style={{ fontSize: 12, color: T.muted, marginBottom: 5 }}>{t('profile_full_name')}</div>
                                 <input
                                     style={inputStyle}
                                     value={fullName}
                                     onChange={e => setFullName(e.target.value)}
-                                    placeholder="Your full name"
+                                    placeholder={t('profile_name_placeholder')}
                                 />
                             </div>
 
                             {/* Province */}
                             <div>
-                                <div style={{ fontSize: 12, color: T.muted, marginBottom: 5 }}>Province</div>
+                                <div style={{ fontSize: 12, color: T.muted, marginBottom: 5 }}>{t('profile_province')}</div>
                                 <select
                                     style={inputStyle}
                                     value={province}
                                     onChange={e => { setProvince(e.target.value); setDistrict(''); }}
                                 >
-                                    <option value="">Select province</option>
+                                    <option value="">{t('profile_select_prov')}</option>
                                     <option value="PUNJAB">Punjab</option>
                                     <option value="SINDH">Sindh</option>
                                     <option value="KPK">KPK (Khyber Pakhtunkhwa)</option>
@@ -239,13 +256,13 @@ export default function ProfileScreen({ navigate }: Props) {
                             {/* District */}
                             {province && (
                                 <div>
-                                    <div style={{ fontSize: 12, color: T.muted, marginBottom: 5 }}>District</div>
+                                    <div style={{ fontSize: 12, color: T.muted, marginBottom: 5 }}>{t('profile_district')}</div>
                                     <select
                                         style={inputStyle}
                                         value={district}
                                         onChange={e => setDistrict(e.target.value)}
                                     >
-                                        <option value="">Select district</option>
+                                        <option value="">{t('profile_select_dist')}</option>
                                         {DISTRICTS[province].map(d => (
                                             <option key={d} value={d}>{d}</option>
                                         ))}
@@ -255,7 +272,7 @@ export default function ProfileScreen({ navigate }: Props) {
 
                             {/* Experience */}
                             <div>
-                                <div style={{ fontSize: 12, color: T.muted, marginBottom: 5 }}>Farming Experience (years)</div>
+                                <div style={{ fontSize: 12, color: T.muted, marginBottom: 5 }}>{t('reg_experience')}</div>
                                 <input
                                     style={inputStyle}
                                     type="number"
@@ -263,21 +280,21 @@ export default function ProfileScreen({ navigate }: Props) {
                                     max="60"
                                     value={experience}
                                     onChange={e => setExperience(e.target.value)}
-                                    placeholder="e.g. 5"
+                                    placeholder={t('profile_exp_placeholder')}
                                 />
                             </div>
 
                             {/* Language */}
                             <div>
-                                <div style={{ fontSize: 12, color: T.muted, marginBottom: 5 }}>Preferred Language</div>
+                                <div style={{ fontSize: 12, color: T.muted, marginBottom: 5 }}>{t('reg_language')}</div>
                                 <select
                                     style={inputStyle}
                                     value={language}
                                     onChange={e => setLanguage(e.target.value)}
                                 >
-                                    <option value="ur">اردو (Urdu)</option>
-                                    <option value="en">English</option>
-                                    <option value="pa">پنجابی (Punjabi)</option>
+                                    <option value="ur">{t('lang_ur')}</option>
+                                    <option value="en">{t('lang_en')}</option>
+                                    <option value="pa">{t('lang_pa')}</option>
                                 </select>
                             </div>
 
@@ -309,17 +326,22 @@ export default function ProfileScreen({ navigate }: Props) {
                                     width: '100%',
                                 }}
                             >
-                                {saving ? 'Saving...' : 'Save Changes'}
+                                {saving ? t('profile_saving') : t('profile_save')}
                             </button>
                         </div>
                     ) : (
                         <>
                             {[
-                                { label: 'Province', value: farmer?.province || '—' },
-                                { label: 'District', value: farmer?.district || '—' },
-                                { label: 'Experience', value: farmer?.farmingExperienceYears ? `${farmer.farmingExperienceYears} years` : '—' },
-                                { label: 'Language', value: farmer?.preferredLanguage === 'ur' ? 'Urdu' : farmer?.preferredLanguage === 'pa' ? 'Punjabi' : 'English' },
-                                { label: 'Total Plots', value: farmer?.plots?.length ?? 0 },
+                                { label: t('profile_province'), value: farmer?.province || '—' },
+                                { label: t('profile_district'), value: farmer?.district || '—' },
+                                {
+                                    label: t('profile_experience'),
+                                    value: farmer?.farmingExperienceYears
+                                        ? `${farmer.farmingExperienceYears} ${t('common_years')}`
+                                        : '—',
+                                },
+                                { label: t('profile_language'), value: langLabel(farmer?.preferredLanguage) },
+                                { label: t('profile_total_plots'), value: farmer?.plots?.length ?? 0 },
                             ].map((row, i, arr) => (
                                 <div
                                     key={row.label}
@@ -347,8 +369,8 @@ export default function ProfileScreen({ navigate }: Props) {
                     overflow: 'hidden',
                 }}>
                     {[
-                        { label: 'App Version', value: '1.0.0' },
-                        { label: 'Crop', value: 'Tomato (Pakistan)' },
+                        { label: t('profile_app_version'), value: '1.0.0' },
+                        { label: t('profile_crop'), value: `${t('cycle_tomato')} (Pakistan)` },
                     ].map((row, i, arr) => (
                         <div
                             key={row.label}
@@ -381,7 +403,7 @@ export default function ProfileScreen({ navigate }: Props) {
                         marginTop: 4,
                     }}
                 >
-                    Log Out
+                    {t('profile_logout')}
                 </button>
 
             </div>

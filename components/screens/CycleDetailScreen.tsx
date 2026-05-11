@@ -3,13 +3,7 @@
 import { useState, useEffect } from 'react';
 import { T } from '@/lib/tokens';
 import Icon from '@/components/ui/Icon';
-
-const TOMATO_STAGES = [
-    { number: 1, name: 'Establishment', days: '0–30' },
-    { number: 2, name: 'Flowering', days: '31–60' },
-    { number: 3, name: 'Fruit Bulking', days: '61–95' },
-    { number: 4, name: 'Maturation', days: '96+' },
-];
+import { useTranslation } from '@/lib/useTranslation';
 
 type Props = {
     cycleId: string;
@@ -17,6 +11,13 @@ type Props = {
 };
 
 export default function CycleDetailScreen({ cycleId, navigate }: Props) {
+    const { t } = useTranslation();
+    const TOMATO_STAGES = [
+        { number: 1, name: t('detail_stage1'), days: '0–30' },
+        { number: 2, name: t('detail_stage2'), days: '31–60' },
+        { number: 3, name: t('detail_stage3'), days: '61–95' },
+        { number: 4, name: t('detail_stage4'), days: '96+' },
+    ];
     const token = localStorage.getItem('token') || '';
 
     const [cycle, setCycle] = useState<any>(null);
@@ -51,9 +52,7 @@ export default function CycleDetailScreen({ cycleId, navigate }: Props) {
     }, [cycleId]);
 
     async function handleComplete() {
-        const confirmed = window.confirm(
-            'Mark this cycle as completed (harvested)?\n\nThis cannot be undone. You will be able to start a new cycle on this plot afterwards.'
-        );
+        const confirmed = window.confirm(t('detail_complete_confirm'));
         if (!confirmed) return;
 
         setCompleting(true);
@@ -67,14 +66,14 @@ export default function CycleDetailScreen({ cycleId, navigate }: Props) {
             navigate('plots');
         } else {
             const data = await res.json();
-            alert(data.error || 'Failed to complete cycle');
+            alert(data.error || t('detail_complete_failed'));
         }
     }
 
     if (loading) {
         return (
             <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: T.muted }}>
-                Loading cycle...
+                {t('detail_loading')}
             </div>
         );
     }
@@ -82,7 +81,7 @@ export default function CycleDetailScreen({ cycleId, navigate }: Props) {
     if (!cycle) {
         return (
             <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: T.muted }}>
-                Cycle not found.
+                {t('detail_not_found')}
             </div>
         );
     }
@@ -115,10 +114,10 @@ export default function CycleDetailScreen({ cycleId, navigate }: Props) {
                         flex: 1,
                     }}>
                         <div style={{ fontSize: 11, opacity: 0.7 }}>
-                            {isPreTransplant ? 'Transplant In' : 'Days Since Transplant'}
+                            {isPreTransplant ? t('detail_transplant_in') : t('detail_days_since')}
                         </div>
                         <div style={{ fontSize: 20, fontWeight: 700 }}>
-                            {isPreTransplant ? `${Math.abs(daysActive)} days` : daysActive}
+                            {isPreTransplant ? `${Math.abs(daysActive)} ${t('common_days')}` : daysActive}
                         </div>
                     </div>
                     <div style={{
@@ -127,7 +126,7 @@ export default function CycleDetailScreen({ cycleId, navigate }: Props) {
                         padding: '10px 14px',
                         flex: 1,
                     }}>
-                        <div style={{ fontSize: 11, opacity: 0.7 }}>Transplant Date</div>
+                        <div style={{ fontSize: 11, opacity: 0.7 }}>{t('detail_transplant_date')}</div>
                         <div style={{ fontSize: 14, fontWeight: 600, marginTop: 2 }}>{transplantDate}</div>
                     </div>
                 </div>
@@ -143,15 +142,15 @@ export default function CycleDetailScreen({ cycleId, navigate }: Props) {
                     padding: '16px',
                 }}>
                     <div style={{ fontSize: 14, fontWeight: 600, color: T.text, marginBottom: 14 }}>
-                        Growth Stages
+                        {t('detail_growth_stages')}
                     </div>
 
                     {isPreTransplant ? (
                         <div style={{ textAlign: 'center', padding: '12px 0' }}>
                             <div style={{ marginBottom: 8 }}><Icon name="leaf" size={32} color={T.green700} /></div>
-                            <div style={{ fontSize: 13, fontWeight: 600, color: T.text }}>Nursery Period</div>
+                            <div style={{ fontSize: 13, fontWeight: 600, color: T.text }}>{t('detail_nursery')}</div>
                             <div style={{ fontSize: 12, color: T.muted, marginTop: 4 }}>
-                                Seedlings will be transplanted in {Math.abs(daysActive)} day{Math.abs(daysActive) !== 1 ? 's' : ''}
+                                {t('detail_nursery_sub', { days: Math.abs(daysActive) })}
                             </div>
                         </div>
                     ) : (
@@ -185,7 +184,7 @@ export default function CycleDetailScreen({ cycleId, navigate }: Props) {
                                         }}>
                                             {stage.name}
                                         </div>
-                                        <div style={{ fontSize: 11, color: T.muted }}>Day {stage.days}</div>
+                                        <div style={{ fontSize: 11, color: T.muted }}>{t('common_day')} {stage.days}</div>
                                     </div>
 
                                     {isActive && (
@@ -197,7 +196,7 @@ export default function CycleDetailScreen({ cycleId, navigate }: Props) {
                                             padding: '3px 8px',
                                             borderRadius: 6,
                                         }}>
-                                            Current
+                                            {t('detail_current')}
                                         </div>
                                     )}
                                 </div>
@@ -223,10 +222,10 @@ export default function CycleDetailScreen({ cycleId, navigate }: Props) {
                     >
                         <div>
                             <div style={{ fontSize: 14, fontWeight: 600, color: '#E65100', display: 'flex', alignItems: 'center', gap: 6 }}>
-                                <Icon name="alert" size={15} color="#E65100" /> Disease Alerts
+                                <Icon name="alert" size={15} color="#E65100" /> {t('detail_disease_alerts')}
                             </div>
                             <div style={{ fontSize: 12, color: '#BF360C', marginTop: 2 }}>
-                                {alertCount} active alert{alertCount > 1 ? 's' : ''}
+                                {t('detail_active_alerts', { count: alertCount })}
                             </div>
                         </div>
                         <div style={{ fontSize: 20, color: '#E65100' }}>›</div>
@@ -246,10 +245,10 @@ export default function CycleDetailScreen({ cycleId, navigate }: Props) {
                     }}>
                         <div>
                             <div style={{ fontSize: 14, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6 }}>
-                                <Icon name="leaf" size={15} color={T.muted} /> Fertilizer Plan
+                                <Icon name="leaf" size={15} color={T.muted} /> {t('detail_fert_plan')}
                             </div>
                             <div style={{ fontSize: 12, marginTop: 2 }}>
-                                Available after transplanting
+                                {t('detail_fert_after')}
                             </div>
                         </div>
                         <div style={{ fontSize: 20 }}>›</div>
@@ -270,10 +269,10 @@ export default function CycleDetailScreen({ cycleId, navigate }: Props) {
                     >
                         <div>
                             <div style={{ fontSize: 14, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6 }}>
-                                <Icon name="leaf" size={15} color="white" /> Fertilizer Plan
+                                <Icon name="leaf" size={15} color="white" /> {t('detail_fert_plan')}
                             </div>
                             <div style={{ fontSize: 12, opacity: 0.8, marginTop: 2 }}>
-                                {hasFertRec ? 'View recommendation' : 'Generate recommendation'}
+                                {hasFertRec ? t('detail_fert_view') : t('detail_fert_gen')}
                             </div>
                         </div>
                         <div style={{ fontSize: 20 }}>›</div>
@@ -297,10 +296,10 @@ export default function CycleDetailScreen({ cycleId, navigate }: Props) {
                     >
                         <div>
                             <div style={{ fontSize: 14, fontWeight: 600, color: T.text, display: 'flex', alignItems: 'center', gap: 6 }}>
-                                <Icon name="search" size={15} color={T.text} /> Scan Leaf for Disease
+                                <Icon name="search" size={15} color={T.text} /> {t('detail_scan')}
                             </div>
                             <div style={{ fontSize: 12, color: T.muted, marginTop: 2 }}>
-                                Upload a photo to detect disease with AI
+                                {t('detail_scan_sub')}
                             </div>
                         </div>
                         <div style={{ fontSize: 20, color: T.muted }}>›</div>
@@ -315,12 +314,12 @@ export default function CycleDetailScreen({ cycleId, navigate }: Props) {
                     border: `1px solid ${T.border}`,
                     padding: '14px 16px',
                 }}>
-                    <div style={{ fontSize: 12, color: T.muted }}>Fertilizer Program</div>
+                    <div style={{ fontSize: 12, color: T.muted }}>{t('detail_fert_program')}</div>
                     <div style={{ fontSize: 14, fontWeight: 600, color: T.text, marginTop: 4 }}>
-                        {cycle.npkTier?.id === 'TOMATO_COMMERCIAL' ? 'Commercial Grower' : 'Extension / Small Farm'}
+                        {cycle.npkTier?.id === 'TOMATO_COMMERCIAL' ? t('detail_commercial') : t('detail_extension')}
                     </div>
                     <div style={{ fontSize: 12, color: T.muted, marginTop: 2 }}>
-                        {cycle.plot?.plotName} · {cycle.plot?.areaAcres} acres
+                        {cycle.plot?.plotName} · {cycle.plot?.areaAcres} {t('common_acres')}
                     </div>
                 </div>
 
@@ -341,8 +340,23 @@ export default function CycleDetailScreen({ cycleId, navigate }: Props) {
                         marginTop: 4,
                     }}
                 >
-                    {completing ? 'Completing...' : 'Mark as Harvested / End Cycle'}
+                    {completing ? t('detail_completing') : t('detail_harvest')}
                 </button>
+
+                {/* Dev helper — tap to copy cycle ID */}
+                <div
+                    onClick={() => {
+                        navigator.clipboard.writeText(cycleId);
+                        alert('Cycle ID copied:\n' + cycleId);
+                    }}
+                    style={{
+                        textAlign: 'center', cursor: 'pointer',
+                        fontSize: 10, color: T.placeholder,
+                        paddingBottom: 8, userSelect: 'all',
+                    }}
+                >
+                    ID: {cycleId}
+                </div>
 
             </div>
         </div>

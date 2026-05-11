@@ -4,6 +4,7 @@ import { useState } from 'react';
 import dynamic from 'next/dynamic';
 import { T } from '@/lib/tokens';
 import Icon from '@/components/ui/Icon';
+import { useTranslation } from "@/lib/useTranslation";
 
 const MapPicker = dynamic<{ onLocationSelect: (lat: number, lng: number) => void }>(
     () => import('@/components/ui/MapPicker'),
@@ -26,6 +27,7 @@ const PROVINCES = ['Punjab', 'Sindh', 'Balochistan', 'KPK'];
 type Props = { navigate: (s: string) => void };
 
 export default function AddPlotScreen({ navigate }: Props) {
+    const { t } = useTranslation();
     const [plotName, setPlotName] = useState('');
     const [area, setArea] = useState('');
     const [lat, setLat] = useState<number | null>(null);
@@ -43,7 +45,7 @@ export default function AddPlotScreen({ navigate }: Props) {
     async function handleLocationSelect(newLat: number, newLng: number) {
         setLat(newLat);
         setLng(newLng);
-        setLocationLabel('Detecting location...');
+        setLocationLabel(t('addplot_detecting'));
         setLocationFailed(false);
 
         try {
@@ -74,8 +76,8 @@ export default function AddPlotScreen({ navigate }: Props) {
     }
 
     async function handleSubmit() {
-        if (!lat || !lng) return alert('Please drop a pin on the map');
-        if (!area) return alert('Please enter area');
+        if (!lat || !lng) return alert(t('addplot_need_pin'));
+        if (!area) return alert(t('addplot_need_area'));
 
         setLoading(true);
         const token = localStorage.getItem('token');
@@ -105,7 +107,7 @@ export default function AddPlotScreen({ navigate }: Props) {
             navigate('plots');
         } else {
             const data = await res.json();
-            alert(data.error || 'Failed to add plot');
+            alert(data.error || t('addplot_failed'));
         }
     }
 
@@ -135,7 +137,7 @@ export default function AddPlotScreen({ navigate }: Props) {
 
                 {/* Plot Name */}
                 <div>
-                    <label style={labelStyle}>Plot Name (optional)</label>
+                    <label style={labelStyle}>{t('addplot_name')}</label>
                     <input
                         style={inputStyle}
                         placeholder="e.g. North Field"
@@ -146,7 +148,7 @@ export default function AddPlotScreen({ navigate }: Props) {
 
                 {/* Area */}
                 <div>
-                    <label style={labelStyle}>Area (acres)</label>
+                    <label style={labelStyle}>{t('addplot_area')}</label>
                     <input
                         style={inputStyle}
                         type="number"
@@ -158,7 +160,7 @@ export default function AddPlotScreen({ navigate }: Props) {
 
                 {/* Map */}
                 <div>
-                    <label style={labelStyle}>Plot Location — tap to drop pin</label>
+                    <label style={labelStyle}>{t('addplot_location')}</label>
                     <div style={{ borderRadius: 14, overflow: 'hidden', height: 200 }}>
                         <MapPicker onLocationSelect={handleLocationSelect} />
                     </div>
@@ -174,21 +176,21 @@ export default function AddPlotScreen({ navigate }: Props) {
                     {locationFailed && (
                         <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 10 }}>
                             <div style={{ fontSize: 13, color: T.muted }}>
-                                Could not detect location. Please select manually:
+                                {t('addplot_no_detect')}
                             </div>
                             <select
                                 style={inputStyle}
                                 value={province}
                                 onChange={e => setProvince(e.target.value)}
                             >
-                                <option value="">Select Province</option>
+                                <option value="">{t('addplot_select_prov')}</option>
                                 {PROVINCES.map(p => (
                                     <option key={p} value={p}>{p}</option>
                                 ))}
                             </select>
                             <input
                                 style={inputStyle}
-                                placeholder="District (optional)"
+                                placeholder={t('addplot_district')}
                                 value={district}
                                 onChange={e => setDistrict(e.target.value)}
                             />
@@ -198,21 +200,21 @@ export default function AddPlotScreen({ navigate }: Props) {
 
                 {/* Farming Type */}
                 <div>
-                    <label style={labelStyle}>Farming Type</label>
+                    <label style={labelStyle}>{t('addplot_farming_type')}</label>
                     <select style={inputStyle} value={farmingType} onChange={e => setFarmingType(e.target.value)}>
-                        <option value="OPEN_FIELD">Open Field</option>
-                        <option value="TUNNEL_SIMPLE">Low Tunnel</option>
-                        <option value="TUNNEL_ADVANCED">High Tunnel</option>
+                        <option value="OPEN_FIELD">{t('type_open')}</option>
+                        <option value="TUNNEL_SIMPLE">{t('type_low_tunnel')}</option>
+                        <option value="TUNNEL_ADVANCED">{t('type_high_tunnel')}</option>
                     </select>
                 </div>
 
                 {/* Irrigation Source */}
                 <div>
-                    <label style={labelStyle}>Water Source</label>
+                    <label style={labelStyle}>{t('addplot_water')}</label>
                     <select style={inputStyle} value={irrigationSource} onChange={e => setIrrigation(e.target.value)}>
-                        <option value="CANAL">Canal</option>
-                        <option value="TUBEWELL">Tubewell</option>
-                        <option value="BRACKISH">Brackish</option>
+                        <option value="CANAL">{t('water_canal')}</option>
+                        <option value="TUBEWELL">{t('water_tubewell')}</option>
+                        <option value="BRACKISH">{t('water_brackish')}</option>
                     </select>
                 </div>
 
@@ -232,7 +234,7 @@ export default function AddPlotScreen({ navigate }: Props) {
                         marginTop: 4,
                     }}
                 >
-                    {loading ? 'Adding...' : 'Add Plot'}
+                    {loading ? t('addplot_adding') : t('addplot_add')}
                 </button>
 
             </div>

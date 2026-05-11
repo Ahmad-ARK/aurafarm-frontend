@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import { T } from "@/lib/tokens";
+import { useTranslation } from "@/lib/useTranslation";
 
 export default function LoginScreen({ navigate }: { navigate: (s: string) => void }) {
+    const { t } = useTranslation();
     const [phone, setPhone] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
@@ -11,7 +13,7 @@ export default function LoginScreen({ navigate }: { navigate: (s: string) => voi
 
     async function handleLogin() {
         if (!phone || !password) {
-            setError('Please enter your phone number and password.');
+            setError(t('login_enter_both'));
             return;
         }
 
@@ -31,9 +33,13 @@ export default function LoginScreen({ navigate }: { navigate: (s: string) => voi
             localStorage.setItem('token', data.token);
             localStorage.setItem('farmerId', data.farmer.id);
             localStorage.setItem('farmerName', data.farmer.fullName);
+            // Save language preference so useTranslation picks it up app-wide
+            if (data.farmer.preferredLanguage) {
+                localStorage.setItem('farmerLanguage', data.farmer.preferredLanguage);
+            }
             navigate('dashboard');
         } else {
-            setError(data.error || 'Login failed. Please try again.');
+            setError(data.error || t('login_failed'));
         }
     }
 
@@ -62,13 +68,12 @@ export default function LoginScreen({ navigate }: { navigate: (s: string) => voi
                 gap: 12,
             }}>
                 <div style={{ fontSize: 28, fontWeight: 700, color: 'white' }}>AuraFarm</div>
-                <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.7)' }}>Smart agricultural decision support</div>
+                <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.7)' }}>{t('login_tagline')}</div>
             </div>
 
             <div style={{ flex: 1, padding: '32px 24px', display: 'flex', flexDirection: 'column', gap: 20 }}>
-                <div style={{ fontSize: 22, fontWeight: 700, color: T.text }}>Welcome back</div>
+                <div style={{ fontSize: 22, fontWeight: 700, color: T.text }}>{t('login_welcome')}</div>
 
-                {/* Inline error */}
                 {error && (
                     <div style={{
                         background: T.red100,
@@ -81,9 +86,8 @@ export default function LoginScreen({ navigate }: { navigate: (s: string) => voi
                     </div>
                 )}
 
-                {/* Phone */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                    <label style={{ fontSize: 13, fontWeight: 500, color: T.muted }}>Phone Number</label>
+                    <label style={{ fontSize: 13, fontWeight: 500, color: T.muted }}>{t('login_phone')}</label>
                     <input
                         type="tel"
                         value={phone}
@@ -93,19 +97,17 @@ export default function LoginScreen({ navigate }: { navigate: (s: string) => voi
                     />
                 </div>
 
-                {/* Password */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                    <label style={{ fontSize: 13, fontWeight: 500, color: T.muted }}>Password</label>
+                    <label style={{ fontSize: 13, fontWeight: 500, color: T.muted }}>{t('login_password')}</label>
                     <input
                         type="password"
                         value={password}
                         onChange={e => setPassword(e.target.value)}
-                        placeholder="Enter password"
+                        placeholder="••••••••"
                         style={inputStyle}
                     />
                 </div>
 
-                {/* Button */}
                 <button
                     onClick={handleLogin}
                     disabled={loading}
@@ -121,16 +123,16 @@ export default function LoginScreen({ navigate }: { navigate: (s: string) => voi
                         width: '100%',
                     }}
                 >
-                    {loading ? 'Signing in...' : 'Sign In'}
+                    {loading ? t('login_signing_in') : t('login_sign_in')}
                 </button>
 
                 <div style={{ textAlign: 'center', fontSize: 14, color: T.muted, marginTop: 16 }}>
-                    Don't have an account?{' '}
+                    {t('login_no_account')}{' '}
                     <span
                         onClick={() => navigate('register')}
                         style={{ color: T.green800, fontWeight: 600, cursor: 'pointer' }}
                     >
-                        Register
+                        {t('login_register')}
                     </span>
                 </div>
             </div>

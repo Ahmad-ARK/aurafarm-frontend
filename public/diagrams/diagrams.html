@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AuraFarm – Project Diagrams</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f5f5f5;
+      padding: 40px 24px;
+      color: #111;
+    }
+    h1 {
+      text-align: center;
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: #1a1a1a;
+    }
+    .subtitle {
+      text-align: center;
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 48px;
+    }
+    .section {
+      background: #ffffff;
+      border-radius: 12px;
+      border: 1px solid #e0e0e0;
+      padding: 32px 32px 24px;
+      margin-bottom: 48px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      page-break-inside: avoid;
+    }
+    .section-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 4px;
+    }
+    .section-desc {
+      font-size: 12px;
+      color: #777;
+      margin-bottom: 24px;
+    }
+    .mermaid {
+      display: flex;
+      justify-content: center;
+    }
+    @media print {
+      body { background: white; padding: 20px; }
+      .section { box-shadow: none; border: 1px solid #ccc; }
+      h1 { font-size: 18px; }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>AuraFarm – Technical Diagrams</h1>
+  <p class="subtitle">Final Year Project &nbsp;|&nbsp; System Architecture &nbsp;&amp;&nbsp; Methodology</p>
+
+  <!-- DIAGRAM 1: System Architecture -->
+  <div class="section">
+    <div class="section-title">Diagram 1 &nbsp;–&nbsp; System Architecture</div>
+    <div class="section-desc">Four-layer view: Frontend PWA, Express.js backend, external services, and PostgreSQL data layer.</div>
+    <div class="mermaid">
+graph TB
+    subgraph CLIENT["Frontend — AuraFarm PWA (Next.js 14)"]
+        direction TB
+        UI["14 Screens (React Components)"]
+        I18N["i18n Engine | Urdu / English | Gulzar font + RTL layout"]
+        NAV["CSS Keep-Alive Navigation | Zero reload on tab switch"]
+    end
+
+    subgraph BACKEND["Backend — Express.js on Railway"]
+        direction TB
+        AUTH["Auth Module | JWT + bcrypt"]
+        PLOTS["Farm Plots Module | GPS · Province · District"]
+        CYCLES["Crop Cycles Module | Stage tracking · Status"]
+        FERT["Fertilizer Calculator | NPK · pH · EC · Soil OC | Water source adjustments"]
+        DISEASE_MOD["Disease Module | Leaf scan proxy | Scan history per cycle"]
+        ALERTS["Alerts Module | Create · Dismiss · View by farmer"]
+        CRON["Daily Scan Job | node-cron — 1:00 AM PKT"]
+        DSV["DSV Accumulation Algorithm | Temp + Humidity + Rainfall | Consecutive days threshold | Tunnel risk multiplier"]
+    end
+
+    subgraph EXTERNAL["External Services"]
+        WEATHER_API["Open-Meteo API | 7-day forecast | No API key required"]
+        CNN["Modal.com | CNN Leaf Disease Model | ResNet — 10 disease classes"]
+        NOMINATIM["Nominatim OpenStreetMap | Reverse geocoding for GPS pin"]
+    end
+
+    subgraph DATA["Data Layer"]
+        DB[("PostgreSQL on Railway | Prisma ORM")]
+    end
+
+    UI -- "HTTPS REST API | Bearer JWT" --> AUTH
+    UI --> PLOTS
+    UI --> CYCLES
+    UI --> FERT
+    UI --> DISEASE_MOD
+    UI --> ALERTS
+    UI -- "Reverse geocode" --> NOMINATIM
+
+    CRON -- "All active cycles" --> DSV
+    CRON --> FERT
+    DSV -- "7-day forecast" --> WEATHER_API
+    DSV -- "Write alert" --> DB
+    FERT --> DB
+
+    DISEASE_MOD -- "Multipart image forward" --> CNN
+    DISEASE_MOD --> DB
+
+    AUTH --> DB
+    PLOTS --> DB
+    CYCLES --> DB
+    ALERTS --> DB
+
+    style CLIENT fill:#E8F5E9,stroke:#2E7D32,color:#000000
+    style BACKEND fill:#E3F2FD,stroke:#1565C0,color:#000000
+    style EXTERNAL fill:#FFF8E1,stroke:#F57F17,color:#000000
+    style DATA fill:#FCE4EC,stroke:#C62828,color:#000000
+    </div>
+  </div>
+
+  <!-- DIAGRAM 2: System Methodology -->
+  <div class="section">
+    <div class="section-title">Diagram 2 &nbsp;–&nbsp; System Methodology / User Flow</div>
+    <div class="section-desc">Complete farmer journey from registration through the automated daily scan cycle and on-demand disease detection.</div>
+    <div class="mermaid">
+flowchart TD
+    A([Farmer Opens App]) --> B{Registered?}
+    B -- No --> C["Register\nName · Phone · Province · Language"]
+    B -- Yes --> D[Login — JWT Token issued]
+    C --> D
+
+    D --> E["Add Farm Plot\nDrop GPS pin · Area in acres\nFarming type · Water source"]
+    E --> F["Enter Soil Lab Data\npH · EC · Organic Carbon · Texture"]
+    F --> G["Start Crop Cycle\nTransplant date · NPK tier · Previous crop"]
+
+    G --> H{Transplant date reached?}
+    H -- Not yet --> I["Nursery Period — countdown shown"]
+    H -- Yes --> J["Stage 1: Establishment\nDays 0 to 30"]
+    J --> K["Stage 2: Flowering\nDays 31 to 60"]
+    K --> L["Stage 3: Fruit Bulking\nDays 61 to 95"]
+    L --> M["Stage 4: Maturation\nDays 96 plus"]
+
+    J & K & L & M --> CRON
+
+    subgraph DAILY["Daily Automated Process — 1:00 AM PKT"]
+        CRON["Fetch 7-day weather forecast\nOpen-Meteo API"] --> O["Apply tunnel temperature adjustment\nSimple tunnel / Advanced tunnel"]
+        O --> P{Check each disease\nweather trigger in DB}
+        P -- "Temp + Humidity + Rainfall\nconsecutive days threshold met" --> Q["Create Disease Alert\nCRITICAL / HIGH / WARNING"]
+        P -- Conditions not met --> R[No alert created]
+        O --> S{Growth stage changed?}
+        S -- Yes --> T["Auto-generate Fertilizer Plan\nNPK base requirement\npH correction factor\nEC salt stress penalty\nWater source multiplier\nPrevious crop nitrogen bonus"]
+    end
+
+    Q --> U["Alert shown in app\nUrdu disease name · Pathogen type\nTrigger temperature and humidity"]
+    T --> V["Fertilizer Plan\nN · P · K kg per acre\nBags required · Application timing"]
+
+    G --> W["Leaf Disease Scan\nOptional — any time during cycle"]
+    W --> X[Upload leaf photo]
+    X --> Y["CNN Model on Modal.com\n10 tomato disease classes"]
+    Y --> Z["Result shown in Urdu\nDisease name · Confidence score\nRecommendation with local product names"]
+    Z --> AA[Saved to cycle scan history]
+
+    M --> AB([Mark as Harvested — Cycle Ends])
+
+    style DAILY fill:#E8F5E9,stroke:#2E7D32,color:#000000
+    </div>
+  </div>
+
+  <!-- DIAGRAM 3: DSV Algorithm -->
+  <div class="section">
+    <div class="section-title">Diagram 3 &nbsp;–&nbsp; DSV Accumulation Algorithm</div>
+    <div class="section-desc">Detailed flowchart of the weather-driven disease risk evaluation that runs nightly for every active crop cycle.</div>
+    <div class="mermaid">
+flowchart LR
+    A["7-day adjusted weather forecast\ntunnel corrections applied"] --> B
+
+    subgraph EVAL["Evaluate each disease trigger stored in database"]
+        B{"Stage number\nin risk window?"} -- No --> SKIP[Skip this disease]
+        B -- Yes --> C{"Active undismissed alert\nexists within last 7 days?"}
+        C -- Yes --> SKIP
+        C -- No --> D[Iterate through forecast days]
+        D --> E{"Temperature in configured range\nHumidity above minimum threshold\nRainfall above minimum threshold?"}
+        E -- Yes --> F["consecutiveDays ++"]
+        E -- No --> G["Reset consecutive counter to 0"]
+        G --> D
+        F --> H{"consecutiveDays reached\nconfigured threshold?"}
+        H -- No --> D
+        H -- Yes --> I["Fetch tunnel risk multiplier\nfrom DiseaseTunnelAdjustment table"]
+        I --> J{"multiplier\nabove 0.5?"}
+        J -- No --> SKIP
+        J -- Yes --> K["Determine alert level from CropDiseaseMap\nEscalate WARNING to HIGH if multiplier high\nEscalate HIGH to CRITICAL if multiplier very high"]
+        K --> L["CREATE ALERT\nWARNING / HIGH / CRITICAL\nStore trigger temp and humidity"]
+        L --> M["Push diseaseId to seen set\nPrevents duplicate in same evaluation run"]
+    end
+
+    style EVAL fill:#E3F2FD,stroke:#1565C0,color:#000000
+    </div>
+  </div>
+
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'default',
+      flowchart: { curve: 'basis', padding: 20 },
+      themeVariables: {
+        fontSize: '14px',
+        fontFamily: 'Segoe UI, Arial, sans-serif',
+      }
+    });
+  </script>
+</body>
+</html>

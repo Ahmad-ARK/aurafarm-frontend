@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { T } from '@/lib/tokens';
+import { useTranslation } from '@/lib/useTranslation';
 
 const API = 'https://aurafarm-production-1691.up.railway.app';
 
@@ -22,6 +23,7 @@ const DISTRICTS: Record<string, string[]> = {
 };
 
 export default function RegisterScreen({ navigate }: Props) {
+    const { t } = useTranslation();
     const [step, setStep] = useState(1); // 2-step form
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
@@ -63,14 +65,15 @@ export default function RegisterScreen({ navigate }: Props) {
             localStorage.setItem('token', data.token);
             localStorage.setItem('farmerId', data.farmer.id);
             localStorage.setItem('farmerName', data.farmer.fullName);
+            localStorage.setItem('farmerLanguage', language);
             if (province) localStorage.setItem('farmerProvince', province);
             if (district) localStorage.setItem('farmerDistrict', district);
             navigate('dashboard');
         } else {
             if (data.error === 'PHONE_ALREADY_REGISTERED') {
-                setError('This phone number is already registered.');
+                setError(t('reg_phone_taken'));
             } else {
-                setError(data.error || 'Registration failed. Please try again.');
+                setError(data.error || t('reg_failed'));
             }
             setStep(1); // go back to step 1 on error
         }
@@ -105,8 +108,8 @@ export default function RegisterScreen({ navigate }: Props) {
                 padding: '40px 24px 32px',
                 color: 'white',
             }}>
-                <div style={{ fontSize: 24, fontWeight: 700 }}>Create Account</div>
-                <div style={{ fontSize: 14, opacity: 0.8, marginTop: 4 }}>Join AuraFarm today</div>
+                <div style={{ fontSize: 24, fontWeight: 700 }}>{t('reg_create_account')}</div>
+                <div style={{ fontSize: 14, opacity: 0.8, marginTop: 4 }}>{t('reg_join')}</div>
 
                 {/* Step indicator */}
                 <div style={{ display: 'flex', gap: 8, marginTop: 20 }}>
@@ -120,7 +123,7 @@ export default function RegisterScreen({ navigate }: Props) {
                     ))}
                 </div>
                 <div style={{ fontSize: 12, opacity: 0.7, marginTop: 6 }}>
-                    Step {step} of 2
+                    {t('reg_step_of', { step })}
                 </div>
             </div>
 
@@ -142,58 +145,27 @@ export default function RegisterScreen({ navigate }: Props) {
                 {step === 1 && (
                     <>
                         <div>
-                            <label style={labelStyle}>Full Name</label>
-                            <input
-                                style={inputStyle}
-                                placeholder="e.g. Ahmad Ali"
-                                value={fullName}
-                                onChange={e => setFullName(e.target.value)}
-                            />
+                            <label style={labelStyle}>{t('reg_full_name')}</label>
+                            <input style={inputStyle} placeholder="Ahmad Ali" value={fullName} onChange={e => setFullName(e.target.value)} />
                         </div>
-
                         <div>
-                            <label style={labelStyle}>Phone Number</label>
-                            <input
-                                style={inputStyle}
-                                placeholder="03001234567"
-                                type="tel"
-                                value={phone}
-                                onChange={e => setPhone(e.target.value)}
-                            />
+                            <label style={labelStyle}>{t('reg_phone')}</label>
+                            <input style={inputStyle} placeholder="03001234567" type="tel" value={phone} onChange={e => setPhone(e.target.value)} />
                         </div>
-
                         <div>
-                            <label style={labelStyle}>Password</label>
-                            <input
-                                style={inputStyle}
-                                placeholder="Min 8 characters"
-                                type="password"
-                                value={password}
-                                onChange={e => setPassword(e.target.value)}
-                            />
+                            <label style={labelStyle}>{t('reg_password')}</label>
+                            <input style={inputStyle} placeholder="••••••••" type="password" value={password} onChange={e => setPassword(e.target.value)} />
                         </div>
-
                         <button
                             onClick={() => {
                                 if (!fullName || fullName.length < 2) return setError('Name must be at least 2 characters');
                                 if (!/^03[0-9]{9}$/.test(phone)) return setError('Enter a valid Pakistani number e.g. 03001234567');
                                 if (password.length < 8) return setError('Password must be at least 8 characters');
-                                setError('');
-                                setStep(2);
+                                setError(''); setStep(2);
                             }}
-                            style={{
-                                background: T.green800,
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: 14,
-                                padding: '16px',
-                                fontSize: 15,
-                                fontWeight: 600,
-                                cursor: 'pointer',
-                                marginTop: 4,
-                            }}
+                            style={{ background: T.green800, color: 'white', border: 'none', borderRadius: 14, padding: '16px', fontSize: 15, fontWeight: 600, cursor: 'pointer', marginTop: 4 }}
                         >
-                            Continue →
+                            {t('reg_next')} →
                         </button>
                     </>
                 )}
@@ -202,57 +174,34 @@ export default function RegisterScreen({ navigate }: Props) {
                 {step === 2 && (
                     <>
                         <div>
-                            <label style={labelStyle}>Province</label>
-                            <select
-                                style={inputStyle}
-                                value={province}
-                                onChange={e => { setProvince(e.target.value); setDistrict(''); }}
-                            >
-                                <option value="">Select province</option>
+                            <label style={labelStyle}>{t('reg_province')}</label>
+                            <select style={inputStyle} value={province} onChange={e => { setProvince(e.target.value); setDistrict(''); }}>
+                                <option value="">{t('reg_select_province')}</option>
                                 <option value="PUNJAB">Punjab</option>
                                 <option value="SINDH">Sindh</option>
                                 <option value="KPK">KPK (Khyber Pakhtunkhwa)</option>
                                 <option value="BALOCHISTAN">Balochistan</option>
                             </select>
                         </div>
-
                         {province && (
                             <div>
-                                <label style={labelStyle}>District</label>
-                                <select
-                                    style={inputStyle}
-                                    value={district}
-                                    onChange={e => setDistrict(e.target.value)}
-                                >
-                                    <option value="">Select district</option>
-                                    {DISTRICTS[province].map(d => (
-                                        <option key={d} value={d}>{d}</option>
-                                    ))}
+                                <label style={labelStyle}>{t('reg_district')}</label>
+                                <select style={inputStyle} value={district} onChange={e => setDistrict(e.target.value)}>
+                                    <option value="">{t('reg_select_district')}</option>
+                                    {DISTRICTS[province].map(d => <option key={d} value={d}>{d}</option>)}
                                 </select>
                             </div>
                         )}
-
                         <div>
-                            <label style={labelStyle}>Farming Experience (years)</label>
-                            <input
-                                style={inputStyle}
-                                placeholder="e.g. 5 (optional)"
-                                type="number"
-                                value={experience}
-                                onChange={e => setExperience(e.target.value)}
-                            />
+                            <label style={labelStyle}>{t('reg_experience')}</label>
+                            <input style={inputStyle} placeholder={t('reg_exp_placeholder')} type="number" value={experience} onChange={e => setExperience(e.target.value)} />
                         </div>
-
                         <div>
-                            <label style={labelStyle}>Preferred Language</label>
-                            <select
-                                style={inputStyle}
-                                value={language}
-                                onChange={e => setLanguage(e.target.value)}
-                            >
-                                <option value="ur">اردو (Urdu)</option>
-                                <option value="en">English</option>
-                                <option value="pa">پنجابی (Punjabi)</option>
+                            <label style={labelStyle}>{t('reg_language')}</label>
+                            <select style={inputStyle} value={language} onChange={e => setLanguage(e.target.value)}>
+                                <option value="ur">{t('lang_ur')}</option>
+                                <option value="en">{t('lang_en')}</option>
+                                <option value="pa">{t('lang_pa')}</option>
                             </select>
                         </div>
 
@@ -271,33 +220,19 @@ export default function RegisterScreen({ navigate }: Props) {
                                 marginTop: 4,
                             }}
                         >
-                            {loading ? 'Creating account...' : 'Create Account'}
+                            {loading ? t('reg_creating') : t('reg_create')}
                         </button>
-
-                        <button
-                            onClick={() => setStep(1)}
-                            style={{
-                                background: 'none',
-                                border: 'none',
-                                color: T.muted,
-                                fontSize: 14,
-                                cursor: 'pointer',
-                                padding: '8px',
-                            }}
-                        >
-                            ← Back
+                        <button onClick={() => setStep(1)} style={{ background: 'none', border: 'none', color: T.muted, fontSize: 14, cursor: 'pointer', padding: '8px' }}>
+                            ← {t('common_cancel')}
                         </button>
                     </>
                 )}
 
                 {/* Login link */}
                 <div style={{ textAlign: 'center', fontSize: 14, color: T.muted, marginTop: 8 }}>
-                    Already have an account?{' '}
-                    <span
-                        onClick={() => navigate('login')}
-                        style={{ color: T.green800, fontWeight: 600, cursor: 'pointer' }}
-                    >
-                        Sign in
+                    {t('reg_already')}{' '}
+                    <span onClick={() => navigate('login')} style={{ color: T.green800, fontWeight: 600, cursor: 'pointer' }}>
+                        {t('reg_sign_in')}
                     </span>
                 </div>
 

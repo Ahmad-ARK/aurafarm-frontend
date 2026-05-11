@@ -3,16 +3,80 @@
 import { useState, useRef, useEffect } from 'react';
 import { T } from '@/lib/tokens';
 import Icon from '@/components/ui/Icon';
+import { useTranslation } from '@/lib/useTranslation';
 
-const DISEASE_INFO: Record<string, { urdu: string; pathogen: string; cure: boolean; action: string }> = {
-    'Late Blight': { urdu: 'بدیا جھلساؤ', pathogen: 'Fungal', cure: false, action: 'Apply copper-based fungicide immediately. Remove and destroy infected leaves.' },
-    'Early Blight': { urdu: 'اگیتا جھلساؤ', pathogen: 'Fungal', cure: true, action: 'Apply mancozeb or chlorothalonil fungicide. Improve air circulation around plants.' },
-    'Tomato Yellow Leaf Curl': { urdu: 'پیلا پتہ موڑ', pathogen: 'Viral', cure: false, action: 'Remove infected plants immediately. Control whitefly population with insecticide.' },
-    'Bacterial Wilt': { urdu: 'بیکٹیریائی مرجھاؤ', pathogen: 'Bacterial', cure: false, action: 'Remove infected plants. Avoid overhead irrigation. Practice crop rotation.' },
-    'Powdery Mildew': { urdu: 'سفید چورن', pathogen: 'Fungal', cure: true, action: 'Apply sulfur-based fungicide. Reduce humidity and improve ventilation.' },
-    'Blossom End Rot': { urdu: 'پھول سڑن', pathogen: 'Physiological', cure: true, action: 'Ensure consistent watering. Apply calcium spray. Check soil pH.' },
-    'Healthy': { urdu: 'صحت مند', pathogen: '', cure: true, action: 'No action needed. Plant appears healthy.' },
+type DiseaseEntry = { urdu: string; pathogen: string; cure: boolean; action: string };
+
+const DISEASE_INFO: Record<string, DiseaseEntry> = {
+    'Bacterial spot': {
+        urdu: 'بیکٹیریائی دھبے',
+        pathogen: 'Bacterial',
+        cure: true,
+        action: 'کاپر پر مبنی دوائی (Kocide یا Funguran OH) لگائیں۔ اوپر سے پانی دینا بند کریں۔ متاثرہ پتے ہٹا دیں۔ اگلی فصل میں کراپ روٹیشن کریں۔',
+    },
+    'Early blight': {
+        urdu: 'اگیتا جھلساؤ',
+        pathogen: 'Fungal',
+        cure: true,
+        action: 'مینکوزیب (Dithane M-45) یا Daconil ہر ۷ تا ۱۰ دن میں لگائیں۔ نیچے کے متاثرہ پتے ہٹا دیں۔ پودوں کے درمیان ہوا کا گزر یقینی بنائیں۔',
+    },
+    'Late blight': {
+        urdu: 'پچھیتا جھلساؤ',
+        pathogen: 'Fungal',
+        cure: false,
+        action: 'فوری طور پر Ridomil Gold یا Funguran لگائیں۔ تمام متاثرہ حصے نکال کر جلا دیں۔ پتوں کو گیلا نہ ہونے دیں۔ یہ بیماری بہت تیزی سے پھیلتی ہے — فوری اقدام کریں۔',
+    },
+    'Leaf mold': {
+        urdu: 'پتے کی پھپھوندی',
+        pathogen: 'Fungal',
+        cure: true,
+        action: 'ہوا کی آمدورفت بہتر بنائیں اور نمی ۸۵٪ سے کم رکھیں۔ Dithane M-45 یا Blue Shield لگائیں۔ متاثرہ پتے توڑ کر تلف کریں۔',
+    },
+    'Septoria leaf spot': {
+        urdu: 'سیپٹوریا دھبے',
+        pathogen: 'Fungal',
+        cure: true,
+        action: 'Dithane M-45 لگائیں۔ نیچے کے متاثرہ پتے فوری ہٹائیں۔ پودوں کی جڑوں پر مٹی چڑھائیں تاکہ چھینٹے نہ پڑیں۔ گیلے پودوں میں کام نہ کریں۔',
+    },
+    'Spider mites': {
+        urdu: 'سُرخ مکڑی',
+        pathogen: 'Pest',
+        cure: true,
+        action: 'Vertimec یا نیم آئل کا محلول پتوں کے نیچے اچھی طرح لگائیں۔ پودوں کے قریب نمی بڑھائیں۔ بہت زیادہ متاثرہ پتے ہٹا دیں۔ ہر ہفتے دہرائیں۔',
+    },
+    'Target spot': {
+        urdu: 'ہدف دھبہ',
+        pathogen: 'Fungal',
+        cure: true,
+        action: 'Amistar (ازوکسی سٹروبن) یا Dithane M-45 لگائیں۔ متاثرہ پتے ہٹائیں۔ ہوا کا گزر یقینی بنائیں۔ اوپر سے پانی دینا بند کریں۔',
+    },
+    'Mosaic virus': {
+        urdu: 'موزیک وائرس',
+        pathogen: 'Viral',
+        cure: false,
+        action: 'متاثرہ پودے فوری نکال کر جلا دیں۔ وائرس پھیلانے والے ایفڈز کے لیے Confidor لگائیں۔ اوزار صاف اور جراثیم سے پاک کریں۔ اگلی فصل میں مزاحم قسم لگائیں۔',
+    },
+    'Yellow leaf curl virus': {
+        urdu: 'پیلا پتہ موڑ وائرس',
+        pathogen: 'Viral',
+        cure: false,
+        action: 'متاثرہ پودے فوری نکال کر جلا دیں۔ سفید مکھی کے لیے Confidor یا Admire لگائیں۔ پیلے چپکنے والے کارڈ لگائیں۔ اگلی فصل میں مزاحم قسم استعمال کریں۔',
+    },
+    'Healthy': {
+        urdu: 'صحت مند',
+        pathogen: '',
+        cure: true,
+        action: 'کوئی علاج ضروری نہیں۔ پودا صحت مند نظر آ رہا ہے۔ باقاعدہ نگرانی جاری رکھیں۔',
+    },
 };
+
+// Case-insensitive lookup to handle any variation the model returns
+function getDiseaseInfo(prediction: string): DiseaseEntry | null {
+    if (DISEASE_INFO[prediction]) return DISEASE_INFO[prediction];
+    const lower = prediction.toLowerCase();
+    const key = Object.keys(DISEASE_INFO).find(k => k.toLowerCase() === lower);
+    return key ? DISEASE_INFO[key] : null;
+}
 
 type LeafScan = {
     id: string;
@@ -27,6 +91,7 @@ type Props = {
 };
 
 export default function DiseaseCheckScreen({ cycleId, navigate }: Props) {
+    const { t } = useTranslation();
     const [image, setImage] = useState<string | null>(null);
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [result, setResult] = useState<{ prediction: string; confidence: number } | null>(null);
@@ -91,7 +156,7 @@ export default function DiseaseCheckScreen({ cycleId, navigate }: Props) {
                 setHistory(prev => [newScan, ...prev]);
             }
         } catch {
-            setError('Failed to analyze image. Check your connection and try again.');
+            setError(t('disease_error'));
         }
         setScanning(false);
     }
@@ -104,7 +169,7 @@ export default function DiseaseCheckScreen({ cycleId, navigate }: Props) {
         setTimeout(() => inputRef.current?.click(), 100);
     }
 
-    const diseaseInfo = result ? DISEASE_INFO[result.prediction] : null;
+    const diseaseInfo = result ? getDiseaseInfo(result.prediction) : null;
     const isLowConfidence = result && result.confidence < 70;
     const isHealthy = result?.prediction === 'Healthy';
 
@@ -118,12 +183,10 @@ export default function DiseaseCheckScreen({ cycleId, navigate }: Props) {
                 color: 'white',
             }}>
                 <div style={{ fontSize: 20, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <Icon name="search" size={20} color="white" /> Leaf Disease Scan
+                    <Icon name="search" size={20} color="white" /> {t('disease_title')}
                 </div>
                 <div style={{ fontSize: 13, opacity: 0.8, marginTop: 4 }}>
-                    {cycleId
-                        ? 'Scans are saved to your active crop cycle'
-                        : 'Take a clear photo of a tomato leaf to detect disease'}
+                    {cycleId ? t('disease_saved_cycle') : t('disease_general')}
                 </div>
             </div>
 
@@ -152,10 +215,10 @@ export default function DiseaseCheckScreen({ cycleId, navigate }: Props) {
                         <>
                             <div style={{ marginBottom: 12 }}><Icon name="camera" size={40} color={T.muted} /></div>
                             <div style={{ fontSize: 14, fontWeight: 600, color: T.text }}>
-                                Tap to take or upload photo
+                                {t('disease_tap')}
                             </div>
                             <div style={{ fontSize: 12, color: T.muted, marginTop: 6 }}>
-                                Use a clear, well-lit photo of a single leaf
+                                {t('disease_clear')}
                             </div>
                         </>
                     )}
@@ -189,7 +252,7 @@ export default function DiseaseCheckScreen({ cycleId, navigate }: Props) {
                     >
                         <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
                             <Icon name={scanning ? 'refresh' : 'search'} size={16} color="white" />
-                            {scanning ? 'Analyzing leaf...' : 'Scan for Disease'}
+                            {scanning ? t('disease_analyzing') : t('disease_scan')}
                         </span>
                     </button>
                 )}
@@ -219,7 +282,7 @@ export default function DiseaseCheckScreen({ cycleId, navigate }: Props) {
                     }}>
                         <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                             <Icon name="alert" size={14} color="#F57F17" />
-                            Low confidence ({result!.confidence.toFixed(1)}%) — please use a clearer, well-lit photo of the affected leaf.
+                            {t('disease_low_conf', { pct: result!.confidence.toFixed(1) })}
                         </span>
                     </div>
                 )}
@@ -236,7 +299,7 @@ export default function DiseaseCheckScreen({ cycleId, navigate }: Props) {
                             {/* Disease name + confidence */}
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
                                 <div>
-                                    <div style={{ fontSize: 11, color: T.muted, marginBottom: 4 }}>Detected Disease</div>
+                                    <div style={{ fontSize: 11, color: T.muted, marginBottom: 4 }}>{t('disease_detected')}</div>
                                     <div style={{ fontSize: 18, fontWeight: 700, color: isHealthy ? T.green800 : '#BF360C' }}>
                                         <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                                             <Icon name={isHealthy ? 'check' : 'bug'} size={18} color={isHealthy ? T.green800 : '#BF360C'} />
@@ -257,7 +320,7 @@ export default function DiseaseCheckScreen({ cycleId, navigate }: Props) {
                                     }}>
                                         {result.confidence.toFixed(1)}%
                                     </div>
-                                    <div style={{ fontSize: 11, color: T.muted }}>confidence</div>
+                                    <div style={{ fontSize: 11, color: T.muted }}>{t('disease_confidence')}</div>
                                 </div>
                             </div>
 
@@ -272,7 +335,7 @@ export default function DiseaseCheckScreen({ cycleId, navigate }: Props) {
                                         padding: '3px 8px',
                                         color: T.muted,
                                     }}>
-                                        {diseaseInfo.pathogen}
+                                        {t(`pathogen_${diseaseInfo.pathogen.toLowerCase()}` as any) || diseaseInfo.pathogen}
                                     </span>
                                     <span style={{
                                         background: diseaseInfo.cure ? T.green50 : '#FBE9E7',
@@ -282,7 +345,7 @@ export default function DiseaseCheckScreen({ cycleId, navigate }: Props) {
                                         padding: '3px 8px',
                                         color: diseaseInfo.cure ? T.green800 : '#BF360C',
                                     }}>
-                                        {diseaseInfo.cure ? 'Treatable' : 'No cure'}
+                                        {diseaseInfo.cure ? t('disease_treatable') : t('disease_no_cure')}
                                     </span>
                                 </div>
                             )}
@@ -297,14 +360,14 @@ export default function DiseaseCheckScreen({ cycleId, navigate }: Props) {
                                     color: T.text,
                                     lineHeight: 1.6,
                                 }}>
-                                    <span style={{ fontWeight: 600 }}>Recommended Action: </span>
-                                    {diseaseInfo.action}
+                                    <div style={{ fontWeight: 600, marginBottom: 4 }}>{t('disease_action')}</div>
+                                    <div>{diseaseInfo.action}</div>
                                 </div>
                             )}
 
                             {cycleId && (
                                 <div style={{ marginTop: 10, fontSize: 11, color: T.muted, display: 'flex', alignItems: 'center', gap: 4 }}>
-                                    <Icon name="check" size={11} color={T.muted} /> Saved to cycle history
+                                    <Icon name="check" size={11} color={T.muted} /> {t('disease_saved')}
                                 </div>
                             )}
                         </div>
@@ -325,7 +388,7 @@ export default function DiseaseCheckScreen({ cycleId, navigate }: Props) {
                             }}
                         >
                             <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-                                <Icon name="camera" size={15} color={T.green800} /> Scan Another Leaf
+                                <Icon name="camera" size={15} color={T.green800} /> {t('disease_scan_another')}
                             </span>
                         </button>
                     </>
@@ -340,18 +403,18 @@ export default function DiseaseCheckScreen({ cycleId, navigate }: Props) {
                         padding: '14px 16px',
                     }}>
                         <div style={{ fontSize: 14, fontWeight: 600, color: T.text, marginBottom: 12 }}>
-                            Scan History
+                            {t('disease_history')}
                         </div>
 
                         {loadingHistory && (
                             <div style={{ fontSize: 13, color: T.muted, textAlign: 'center', padding: '8px 0' }}>
-                                Loading history...
+                                {t('disease_loading_history')}
                             </div>
                         )}
 
                         {!loadingHistory && history.length === 0 && (
                             <div style={{ fontSize: 13, color: T.muted, textAlign: 'center', padding: '8px 0' }}>
-                                No scans yet for this cycle
+                                {t('disease_no_scans')}
                             </div>
                         )}
 
@@ -382,7 +445,7 @@ export default function DiseaseCheckScreen({ cycleId, navigate }: Props) {
                                             {scan.prediction}
                                         </div>
                                         <div style={{ fontSize: 11, color: T.muted, marginTop: 2 }}>
-                                            {new Date(scan.scannedAt).toLocaleDateString('en-PK', {
+                                            {new Date(scan.scannedAt).toLocaleDateString('en-GB', {
                                                 day: 'numeric', month: 'short', year: 'numeric',
                                             })}
                                         </div>
